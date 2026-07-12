@@ -1048,6 +1048,7 @@ function renderWebTimeline(visits) {
         const time = new Date(v.visited_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
         const color = catColors[v.category] || catColors.other;
         const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(v.domain)}&sz=32`;
+        const fullUrl = v.url && v.url !== v.domain ? (v.url.startsWith('http') ? v.url : `https://${v.url}`) : null;
         return `
             <div class="web-timeline-item">
                 <div class="web-timeline-dot" style="background:${color}"></div>
@@ -1057,6 +1058,7 @@ function renderWebTimeline(visits) {
                         <span class="web-timeline-domain">${escapeHtml(v.domain)}</span>
                         <span class="web-timeline-time">${time}</span>
                     </div>
+                    ${fullUrl ? `<div style="margin-top:2px;font-size:0.75rem;word-break:break-all;"><a href="${escapeHtml(fullUrl)}" target="_blank" style="color:var(--accent);text-decoration:none;">🔗 ${escapeHtml(v.url)}</a></div>` : ''}
                     <div class="web-timeline-meta">
                         <span class="web-timeline-duration">${formatDuration(v.duration_seconds || 0)}</span>
                         <span class="web-timeline-cat" style="color:${color}">${v.category || 'other'}</span>
