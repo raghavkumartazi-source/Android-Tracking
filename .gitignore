@@ -1,4 +1,25 @@
+# Node
 node_modules/
+npm-debug.log*
+
+# Private Data & Screenshots
 data/
-.env
+screenshots/
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+.env.*
+
+# Android / Gradle Build files
+android-agent/build/
+android-agent/app/build/
+android-agent/.gradle/
+android-agent/.idea/
+android-agent/local.properties
+*.apk
+
+# OS junk
+.DS_Store
+Thumbs.db
