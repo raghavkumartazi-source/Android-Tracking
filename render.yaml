@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: bharatwatch-server
+    runtime: docker
+    plan: free
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: DASHBOARD_PIN
+        value: 1234
+      - key: AGENT_KEY
+        value: bharatwatch-agent-secret-change-me
+      - key: DATABASE_PATH
+        value: /app/data/bharatwatch.db
+      - key: SCREENSHOTS_DIR
+        value: /app/data/screenshots

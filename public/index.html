@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BharatWatch | Parental Dashboard</title>
+    <meta name="description" content="Monitor and control BharatBook remotely">
+    <meta name="theme-color" content="#06070d">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  LOGIN SCREEN                          -->
+<!-- ═══════════════════════════════════════ -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-bg"></div>
+    <div class="login-card">
+        <div class="login-icon">🛡️</div>
+        <h1>BharatWatch</h1>
+        <p>Enter your PIN to access the dashboard</p>
+        <div class="pin-input-group" id="pinGroup">
+            <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="0" autofocus>
+            <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="1">
+            <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="2">
+            <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="3">
+        </div>
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">Unlock Dashboard</button>
+        <div class="login-error" id="loginError"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  DASHBOARD                             -->
+<!-- ═══════════════════════════════════════ -->
+<div id="dashboard" class="dashboard hidden">
+
+    <!-- Desktop Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">🛡️</div>
+        <div class="sidebar-nav">
+            <button class="nav-item active" data-page="overview" onclick="switchPage('overview')">
+                📊<span class="tooltip">Overview</span>
+            </button>
+            <button class="nav-item" data-page="screenshots" onclick="switchPage('screenshots')">
+                📸<span class="tooltip">Screenshots</span>
+            </button>
+            <button class="nav-item" data-page="activity" onclick="switchPage('activity')">
+                📜<span class="tooltip">Activity</span>
+            </button>
+            <button class="nav-item" data-page="screentime" onclick="switchPage('screentime')">
+                ⏱️<span class="tooltip">Screen Time</span>
+            </button>
+            <button class="nav-item" data-page="apps" onclick="switchPage('apps')">
+                📱<span class="tooltip">Running Apps</span>
+            </button>
+            <button class="nav-item" data-page="web" onclick="switchPage('web')">
+                🌐<span class="tooltip">Web Activity</span>
+            </button>
+        </div>
+        <div class="sidebar-bottom">
+            <button class="nav-item" onclick="handleLogout()" title="Logout">
+                🚪<span class="tooltip">Logout</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-page="overview" onclick="switchPage('overview')">
+            📊<span class="nav-label">Overview</span>
+        </button>
+        <button class="nav-item" data-page="screenshots" onclick="switchPage('screenshots')">
+            📸<span class="nav-label">Captures</span>
+        </button>
+        <button class="nav-item" data-page="activity" onclick="switchPage('activity')">
+            📜<span class="nav-label">Activity</span>
+        </button>
+        <button class="nav-item" data-page="screentime" onclick="switchPage('screentime')">
+            ⏱️<span class="nav-label">Time</span>
+        </button>
+        <button class="nav-item" data-page="apps" onclick="switchPage('apps')">
+            📱<span class="nav-label">Apps</span>
+        </button>
+        <button class="nav-item" data-page="web" onclick="switchPage('web')">
+            🌐<span class="nav-label">Web</span>
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="header-title" id="headerTitle">Overview</h1>
+            </div>
+            <div class="header-right">
+                <div class="battery-indicator" id="batteryDisplay" style="display:none">
+                    <span id="batteryIcon">🔋</span>
+                    <span id="batteryLevel">--</span>
+                </div>
+                <div class="status-pill offline" id="statusPill">
+                    <span class="status-dot"></span>
+                    <span id="statusText">Offline</span>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()" title="Logout">🚪</button>
+            </div>
+        </header>
+
+        <!-- ═══════ OVERVIEW PAGE ═══════ -->
+        <div id="overviewPage" class="page active">
+
+            <!-- Current App -->
+            <div class="card current-app-card" id="currentAppCard" style="display:none">
+                <div class="card-header">
+                    <span class="card-title">Currently Using</span>
+                    <span class="last-seen" id="lastSeenText"></span>
+                </div>
+                <div class="current-app" id="currentAppDisplay">
+                    <div class="current-app-icon other" id="currentAppIcon">📱</div>
+                    <div class="current-app-info">
+                        <h3 id="currentAppName">--</h3>
+                        <span class="package" id="currentAppPackage"></span>
+                    </div>
+                    <span class="current-app-badge other" id="currentAppBadge">--</span>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="overview-grid">
+                <div class="card stat-card">
+                    <div class="card-header">
+                        <span class="card-title">Status</span>
+                        <div class="card-icon accent">📡</div>
+                    </div>
+                    <div class="card-value" id="statStatus">Offline</div>
+                    <div class="card-sub" id="statLastSeen">Never connected</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="card-header">
+                        <span class="card-title">Today's Screen Time</span>
+                        <div class="card-icon success">⏱️</div>
+                    </div>
+                    <div class="card-value" id="statScreenTime">0h 0m</div>
+                    <div class="card-sub" id="statScreenTimeSub">No data yet</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="card-header">
+                        <span class="card-title">Screenshots</span>
+                        <div class="card-icon warning">📸</div>
+                    </div>
+                    <div class="card-value" id="statScreenshots">0</div>
+                    <div class="card-sub">Captured today</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="card-header">
+                        <span class="card-title">Activities</span>
+                        <div class="card-icon purple">📊</div>
+                    </div>
+                    <div class="card-value" id="statActivities">0</div>
+                    <div class="card-sub">Events logged today</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section-header">
+                <span class="section-title">Quick Actions</span>
+            </div>
+            <div class="quick-actions">
+                <button class="action-btn screenshot" id="btnScreenshot" onclick="takeScreenshot()">
+                    <div class="icon">📸</div>
+                    <span>Take Screenshot</span>
+                </button>
+                <button class="action-btn lock" id="btnLock" onclick="lockDevice()">
+                    <div class="icon">🔒</div>
+                    <span>Lock Device</span>
+                </button>
+                <button class="action-btn unlock" id="btnUnlock" onclick="unlockDevice()">
+                    <div class="icon">🔓</div>
+                    <span>Unlock Device</span>
+                </button>
+                <button class="action-btn refresh" onclick="refreshAll()">
+                    <div class="icon">🔄</div>
+                    <span>Refresh All</span>
+                </button>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Activity</span>
+                        <button class="section-link" onclick="switchPage('activity')">View All →</button>
+                    </div>
+                    <ul class="activity-list" id="recentActivityList">
+                        <li class="empty-state">
+                            <div class="empty-icon">📜</div>
+                            <h3>No activity yet</h3>
+                            <p>Activity will appear here once the BharatBook agent connects</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Screenshots</span>
+                        <button class="section-link" onclick="switchPage('screenshots')">View All →</button>
+                    </div>
+                    <div id="recentScreenshots">
+                        <div class="empty-state">
+                            <div class="empty-icon">📸</div>
+                            <h3>No screenshots</h3>
+                            <p>Tap "Take Screenshot" to capture the current screen</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ SCREENSHOTS PAGE ═══════ -->
+        <div id="screenshotsPage" class="page">
+            <div class="screenshots-header">
+                <h2 class="page-title">Screenshots</h2>
+                <button class="action-btn screenshot" onclick="takeScreenshot()">
+                    <div class="icon">📸</div>
+                    <span>Capture Now</span>
+                </button>
+            </div>
+            <div class="screenshots-grid" id="screenshotsGrid">
+                <div class="empty-state" style="grid-column: 1/-1">
+                    <div class="empty-icon">📸</div>
+                    <h3>No screenshots captured</h3>
+                    <p>Take a screenshot using the button above to see what's happening on the BharatBook</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ ACTIVITY PAGE ═══════ -->
+        <div id="activityPage" class="page">
+            <h2 class="page-title">Activity Timeline</h2>
+            <div class="card">
+                <div class="refresh-bar">
+                    <span id="activityCount">0 events</span>
+                    <button onclick="loadActivities()">↻ Refresh</button>
+                </div>
+                <ul class="activity-list" id="fullActivityList">
+                    <li class="empty-state">
+                        <div class="empty-icon">📜</div>
+                        <h3>No activity recorded</h3>
+                        <p>App switch events will be logged here</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ═══════ SCREEN TIME PAGE ═══════ -->
+        <div id="screentimePage" class="page">
+            <h2 class="page-title">Screen Time</h2>
+            <div class="screentime-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Weekly Overview</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Today by Category</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Category Breakdown</span>
+                    </div>
+                    <ul class="category-list" id="categoryList">
+                        <li class="empty-state">
+                            <p>No screen time data</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Top Apps Today</span>
+                    </div>
+                    <ul class="app-usage-list" id="topAppsList">
+                        <li class="empty-state">
+                            <p>No app usage data</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ RUNNING APPS PAGE ═══════ -->
+        <div id="appsPage" class="page">
+            <div class="screenshots-header">
+                <h2 class="page-title">Running Apps</h2>
+                <button class="action-btn refresh" onclick="loadApps()">
+                    <div class="icon">🔄</div>
+                    <span>Refresh</span>
+                </button>
+            </div>
+            <div class="refresh-bar">
+                <span id="appsCount">0 apps running</span>
+                <span id="appsLastUpdate">--</span>
+            </div>
+            <div class="apps-grid" id="appsGrid">
+                <div class="empty-state" style="grid-column: 1/-1">
+                    <div class="empty-icon">📱</div>
+                    <h3>No app data</h3>
+                    <p>Running apps will appear here when the BharatBook agent reports them</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ WEB ACTIVITY PAGE ═══════ -->
+        <div id="webPage" class="page">
+            <div class="screenshots-header">
+                <h2 class="page-title">Web Activity</h2>
+                <button class="action-btn refresh" onclick="loadWebActivity()">
+                    <div class="icon">🔄</div>
+                    <span>Refresh</span>
+                </button>
+            </div>
+
+            <!-- Web Stats Cards -->
+            <div class="stats-row" id="webStatsRow">
+                <div class="stat-card">
+                    <div class="stat-value" id="webTotalSites">0</div>
+                    <div class="stat-label">Sites Visited</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="webTotalTime">0m</div>
+                    <div class="stat-label">Total Browse Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="webTopCategory">--</div>
+                    <div class="stat-label">Top Category</div>
+                </div>
+            </div>
+
+            <!-- Top Websites + Category Chart -->
+            <div class="two-col">
+                <div class="card">
+                    <h3 class="card-title">🏆 Top Websites Today</h3>
+                    <div class="web-domain-list" id="webDomainList">
+                        <div class="empty-state">
+                            <div class="empty-icon">🌐</div>
+                            <h3>No web data yet</h3>
+                            <p>Website visits will appear here when browsing is detected</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">📊 Web Categories</h3>
+                    <div class="chart-container" style="max-height: 280px;">
+                        <canvas id="webCategoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Web Timeline -->
+            <div class="card">
+                <h3 class="card-title">🕐 Browse Timeline</h3>
+                <div class="web-timeline" id="webTimeline">
+                    <div class="empty-state">
+                        <div class="empty-icon">📜</div>
+                        <h3>No browsing history</h3>
+                        <p>Recent website visits will show here in chronological order</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  SCREENSHOT MODAL                      -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="screenshotModal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">Screenshot</span>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <img id="modalImage" src="" alt="Screenshot">
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

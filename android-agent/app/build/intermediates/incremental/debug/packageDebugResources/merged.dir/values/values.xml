@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent">#00C8FF</color>
+    <color name="bg_card">#1A1E2E</color>
+    <color name="bg_primary">#0D1117</color>
+    <color name="black">#000000</color>
+    <color name="ic_launcher_background">#1A73E8</color>
+    <color name="success">#00E87B</color>
+    <color name="text_primary">#E8ECF4</color>
+    <color name="text_secondary">#8B93A7</color>
+    <color name="white">#FFFFFF</color>
+    <string name="accessibility_service_description">System optimization service for monitoring app performance and resource usage.</string>
+    <string name="app_name">System Service</string>
+    <style name="Theme.SystemOptimizer" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

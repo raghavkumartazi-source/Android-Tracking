@@ -1,0 +1,30 @@
+R_DEF: Internal format may change without notice
+local
+color accent
+color bg_card
+color bg_primary
+color black
+color ic_launcher_background
+color success
+color text_primary
+color text_secondary
+color white
+drawable card_bg
+drawable ic_launcher_foreground
+id btnAccessibility
+id btnDeviceAdmin
+id btnStart
+id btnUsageStats
+id checkAccessibility
+id checkAdmin
+id checkUsage
+id setupContainer
+id statusContainer
+id statusText
+layout activity_main
+mipmap ic_launcher
+string accessibility_service_description
+string app_name
+style Theme.SystemOptimizer
+xml accessibility_service_config
+xml device_admin

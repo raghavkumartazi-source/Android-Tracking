@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">System Service</string>
+    <string name="accessibility_service_description">System optimization service for monitoring app performance and resource usage.</string>
+</resources>
