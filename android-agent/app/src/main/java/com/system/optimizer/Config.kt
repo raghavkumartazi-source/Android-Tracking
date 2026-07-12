@@ -19,7 +19,7 @@ object Config {
      *   ngrok:       "wss://abc123.ngrok-free.app/ws/agent"
      *   Cloud:       "wss://bharatwatch.onrender.com/ws/agent"
      */
-    const val SERVER_URL = "ws://192.168.31.135:3000/ws/agent"
+    const val SERVER_URL = "wss://bharatwatch-server.onrender.com/ws/agent"
 
     /**
      * Must match the AGENT_KEY in your server's .env file

