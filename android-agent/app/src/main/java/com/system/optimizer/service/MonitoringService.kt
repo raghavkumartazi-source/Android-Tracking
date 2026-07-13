@@ -41,6 +41,43 @@ class MonitoringService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var lastEventCheckTime = System.currentTimeMillis()
 
+    companion object {
+        @Volatile
+        var isPersistentLocked = false
+    }
+
+    private val screenLockReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (isPersistentLocked && context != null) {
+                try {
+                    val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+                    val admin = ComponentName(context, AdminReceiver::class.java)
+                    if (dpm.isAdminActive(admin)) {
+                        dpm.lockNow()
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    private val persistentLockTask = object : Runnable {
+        override fun run() {
+            if (isPersistentLocked) {
+                try {
+                    val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+                    if (pm.isInteractive) {
+                        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+                        val admin = ComponentName(this@MonitoringService, AdminReceiver::class.java)
+                        if (dpm.isAdminActive(admin)) {
+                            dpm.lockNow()
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+            handler.postDelayed(this, 1000)
+        }
+    }
+
     // ═══════════════════════════════════════════
     //  Periodic task runnables
     // ═══════════════════════════════════════════
@@ -98,6 +135,15 @@ class MonitoringService : Service() {
             Log.i(TAG, "🌐 Web: $domain (${durationSeconds}s) [visit: $visitId]")
             wsManager.sendWebActivity(domain, url, durationSeconds, visitId)
         }
+
+        try {
+            val filter = android.content.IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_USER_PRESENT)
+            }
+            registerReceiver(screenLockReceiver, filter)
+        } catch (_: Exception) {}
+        handler.postDelayed(persistentLockTask, 1000)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -263,9 +309,10 @@ class MonitoringService : Service() {
             val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
             val admin = ComponentName(this, AdminReceiver::class.java)
             if (dpm.isAdminActive(admin)) {
+                isPersistentLocked = true
                 dpm.lockNow()
-                wsManager.sendCommandResult(cmdId, true, "Device locked")
-                Log.i(TAG, "🔒 Device locked")
+                wsManager.sendCommandResult(cmdId, true, "Device locked persistently until unlock command is executed")
+                Log.i(TAG, "🔒 Device locked persistently")
             } else {
                 wsManager.sendCommandResult(cmdId, false, "Device admin not active")
             }
@@ -276,6 +323,7 @@ class MonitoringService : Service() {
 
     private fun handleUnlock(cmdId: String) {
         try {
+            isPersistentLocked = false
             // We can't truly unlock (requires user PIN/fingerprint)
             // But we CAN wake the screen so they see the lock screen
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -288,8 +336,8 @@ class MonitoringService : Service() {
             )
             wl.acquire(5_000L)
             wl.release()
-            wsManager.sendCommandResult(cmdId, true, "Screen woken up")
-            Log.i(TAG, "🔓 Screen turned on")
+            wsManager.sendCommandResult(cmdId, true, "Persistent lock disabled — screen turned on")
+            Log.i(TAG, "🔓 Screen turned on and persistent lock disabled")
         } catch (e: Exception) {
             wsManager.sendCommandResult(cmdId, false, "Unlock failed: ${e.message}")
         }

