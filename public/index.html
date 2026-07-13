@@ -372,7 +372,13 @@
 
             <!-- Web Timeline -->
             <div class="card">
-                <h3 class="card-title">🕐 Browse Timeline</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                    <h3 class="card-title" style="margin-bottom:0;">🕐 Browse Timeline & Full History</h3>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn btn-sm" onclick="openHistoryModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-weight:500;">📂 View Full History</button>
+                        <button class="btn btn-sm" onclick="exportHistoryCsv()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-weight:500;">⬇️ Export CSV</button>
+                    </div>
+                </div>
                 <div class="web-timeline" id="webTimeline">
                     <div class="empty-state">
                         <div class="empty-icon">📜</div>
@@ -397,6 +403,53 @@
         </div>
         <div class="modal-body">
             <img id="modalImage" src="" alt="Screenshot">
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  FULL BROWSER HISTORY MODAL            -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="historyModal" onclick="closeHistoryModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 850px; width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1rem;">
+            <div>
+                <span class="modal-title" style="font-size: 1.25rem;">📂 Full Browser History</span>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 0.25rem;">All monitored website activity and search history across all dates</div>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                <button class="btn btn-sm" onclick="exportHistoryCsv()" style="background:#fff; color:#000; font-weight:600;">⬇️ Export CSV</button>
+                <button class="modal-close" onclick="closeHistoryModal()">✕</button>
+            </div>
+        </div>
+        <div style="display:flex; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap;">
+            <input type="text" id="historySearchInput" placeholder="🔍 Search domains, URLs or categories..." oninput="filterHistory()" style="flex:1; min-width:200px; background:#080808; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.6rem 1rem; color:#fff; font-size:0.9rem;">
+            <select id="historyCategoryFilter" onchange="filterHistory()" style="background:#080808; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.6rem 1rem; color:#fff; font-size:0.9rem;">
+                <option value="">All Categories</option>
+                <option value="study">Study</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="social">Social</option>
+                <option value="shopping">Shopping</option>
+                <option value="news">News</option>
+                <option value="gaming">Gaming</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 0;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.15); color: #aaa; background: rgba(255,255,255,0.03); position: sticky; top: 0;">
+                        <th style="padding: 0.75rem 0.5rem;">Domain / Site</th>
+                        <th style="padding: 0.75rem 0.5rem;">Full URL</th>
+                        <th style="padding: 0.75rem 0.5rem;">Duration</th>
+                        <th style="padding: 0.75rem 0.5rem;">Category</th>
+                        <th style="padding: 0.75rem 0.5rem;">Date & Time</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr><td colspan="5" style="text-align: center; padding: 2rem; color: #666;">Loading browser history...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

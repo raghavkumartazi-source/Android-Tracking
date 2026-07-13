@@ -41,7 +41,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Auth middleware
 function requireAuth(req, res, next) {
-    const token = req.headers['authorization']?.replace('Bearer ', '');
+    const token = req.headers['authorization']?.replace('Bearer ', '') || req.query.token;
     if (!token || !sessions.has(token)) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -275,7 +275,7 @@ app.get('/api/screenshots/file/:filename', requireAuth, (req, res) => {
 // ═══════════════════════════════════════════
 app.get('/api/web-activity', requireAuth, (req, res) => {
     const date = req.query.date || new Date().toISOString().split('T')[0];
-    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const limit = Math.min(parseInt(req.query.limit) || 100, 1000);
     const visits = db.prepare(
         `SELECT * FROM web_activity 
          WHERE visited_at >= ? AND visited_at < date(?, '+1 day')
@@ -296,6 +296,51 @@ app.get('/api/web-activity/summary', requireAuth, (req, res) => {
          ORDER BY total_seconds DESC`
     ).all(date, date);
     res.json(summary);
+});
+
+app.get('/api/web-activity/history', requireAuth, (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit) || 1000, 5000);
+    const search = req.query.q ? `%${req.query.q}%` : null;
+    let visits;
+    if (search) {
+        visits = db.prepare(
+            `SELECT * FROM web_activity 
+             WHERE domain LIKE ? OR url LIKE ? OR category LIKE ?
+             ORDER BY visited_at DESC LIMIT ?`
+        ).all(search, search, search, limit);
+    } else {
+        visits = db.prepare(
+            `SELECT * FROM web_activity 
+             ORDER BY visited_at DESC LIMIT ?`
+        ).all(limit);
+    }
+    res.json(visits);
+});
+
+app.get('/api/web-activity/export', requireAuth, (req, res) => {
+    const visits = db.prepare(
+        `SELECT domain, url, duration_seconds, category, visited_at 
+         FROM web_activity 
+         ORDER BY visited_at DESC`
+    ).all();
+
+    const headers = ['Domain', 'URL', 'Duration (seconds)', 'Category', 'Date & Time'];
+    const csvRows = [headers.join(',')];
+
+    for (const v of visits) {
+        const row = [
+            `"${(v.domain || '').replace(/"/g, '""')}"`,
+            `"${(v.url || '').replace(/"/g, '""')}"`,
+            v.duration_seconds || 0,
+            `"${(v.category || 'other').replace(/"/g, '""')}"`,
+            `"${(v.visited_at || '').replace(/"/g, '""')}"`
+        ];
+        csvRows.push(row.join(','));
+    }
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="bharatwatch_browser_history.csv"');
+    res.send(csvRows.join('\n'));
 });
 
 // ═══════════════════════════════════════════

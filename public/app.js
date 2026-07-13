@@ -1113,3 +1113,94 @@ function showToast(message, type = 'info') {
 setInterval(() => {
     if (authToken) loadStatus();
 }, 15000);
+
+// ═══════════════════════════════════════════
+//  FULL BROWSER HISTORY & EXPORT
+// ═══════════════════════════════════════
+let fullHistoryData = [];
+
+async function openHistoryModal() {
+    const modal = document.getElementById('historyModal');
+    if (!modal) return;
+    modal.classList.add('active');
+    document.getElementById('historySearchInput').value = '';
+    document.getElementById('historyCategoryFilter').value = '';
+    await loadFullHistory();
+}
+
+function closeHistoryModal(e) {
+    if (e && e.target && e.target !== e.currentTarget) return;
+    const modal = document.getElementById('historyModal');
+    if (modal) modal.classList.remove('active');
+}
+
+async function loadFullHistory() {
+    const tbody = document.getElementById('historyTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #666;">Loading browser history...</td></tr>';
+    try {
+        fullHistoryData = await apiFetch('/api/web-activity/history?limit=2000');
+        renderHistoryTable(fullHistoryData);
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load browser history</td></tr>';
+        console.error('Failed to load history:', e);
+    }
+}
+
+function filterHistory() {
+    const q = (document.getElementById('historySearchInput')?.value || '').toLowerCase().trim();
+    const cat = (document.getElementById('historyCategoryFilter')?.value || '').toLowerCase();
+    const filtered = fullHistoryData.filter(v => {
+        const matchQ = !q || (v.domain && v.domain.toLowerCase().includes(q)) || (v.url && v.url.toLowerCase().includes(q)) || (v.category && v.category.toLowerCase().includes(q));
+        const matchCat = !cat || (v.category && v.category.toLowerCase() === cat);
+        return matchQ && matchCat;
+    });
+    renderHistoryTable(filtered);
+}
+
+function renderHistoryTable(visits) {
+    const tbody = document.getElementById('historyTableBody');
+    if (!tbody) return;
+    if (!visits || !visits.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #666;">No matching browser history found</td></tr>';
+        return;
+    }
+    const catColors = {
+        study: '#10b981',
+        entertainment: '#f59e0b',
+        social: '#8b5cf6',
+        shopping: '#ec4899',
+        news: '#3b82f6',
+        gaming: '#ef4444',
+        other: '#6b7280'
+    };
+    tbody.innerHTML = visits.map(v => {
+        const dateStr = new Date(v.visited_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        const color = catColors[v.category] || catColors.other;
+        const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(v.domain)}&sz=32`;
+        const fullUrl = v.url && v.url !== v.domain ? (v.url.startsWith('http') ? v.url : `https://${v.url}`) : `https://${v.domain}`;
+        return `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                <td style="padding: 0.75rem 0.5rem; display:flex; align-items:center; gap:0.5rem;">
+                    <img src="${favicon}" alt="" style="width:16px;height:16px;border-radius:2px;" onerror="this.style.display='none'">
+                    <span style="font-weight:500; color:#fff;">${escapeHtml(v.domain)}</span>
+                </td>
+                <td style="padding: 0.75rem 0.5rem; max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    <a href="${escapeHtml(fullUrl)}" target="_blank" style="color:rgba(255,255,255,0.7); text-decoration:none;" title="${escapeHtml(v.url)}">${escapeHtml(v.url || v.domain)}</a>
+                </td>
+                <td style="padding: 0.75rem 0.5rem; color:#fff; font-weight:500;">${formatDuration(v.duration_seconds || 0)}</td>
+                <td style="padding: 0.75rem 0.5rem;"><span style="color:${color}; font-weight:600; text-transform:capitalize;">${v.category || 'other'}</span></td>
+                <td style="padding: 0.75rem 0.5rem; color:#888; font-size:0.8rem;">${dateStr}</td>
+            </tr>`;
+    }).join('');
+}
+
+function exportHistoryCsv() {
+    if (!authToken) {
+        showToast('Please log in first', 'error');
+        return;
+    }
+    window.location.href = `/api/web-activity/export?token=${authToken}`;
+    showToast('Exporting full browser history CSV...', 'info');
+}
+
