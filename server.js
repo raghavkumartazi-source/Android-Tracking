@@ -514,27 +514,26 @@ function handleAgentMessage(msg) {
             const category = categorizeWebDomain(msg.domain);
             const duration = msg.duration ?? 0;
             const visitedAt = msg.timestamp || now;
+            const visitId = msg.visitId || null;
 
-            // Check if there's a recent entry for the same URL in the last 2 minutes (periodic updates from active visits)
-            const existing = db.prepare(
-                `SELECT id, duration_seconds FROM web_activity 
-                 WHERE url = ? AND visited_at > datetime(?, '-2 minutes') 
-                 ORDER BY id DESC LIMIT 1`
-            ).get(msg.url ?? msg.domain, visitedAt);
-
-            if (existing) {
-                // Update duration of existing visit (periodic refresh from BrowserTracker)
-                db.prepare('UPDATE web_activity SET duration_seconds = ? WHERE id = ?')
-                    .run(Math.max(duration, existing.duration_seconds), existing.id);
+            if (visitId) {
+                const existing = db.prepare('SELECT id FROM web_activity WHERE visit_id = ?').get(visitId);
+                if (existing) {
+                    db.prepare('UPDATE web_activity SET duration_seconds = ?, url = ?, visited_at = ? WHERE visit_id = ?')
+                        .run(duration, msg.url ?? msg.domain, visitedAt, visitId);
+                } else {
+                    db.prepare('INSERT INTO web_activity (visit_id, domain, url, duration_seconds, category, visited_at) VALUES (?, ?, ?, ?, ?, ?)')
+                        .run(visitId, msg.domain, msg.url ?? msg.domain, duration, category, visitedAt);
+                }
             } else {
-                // New visit
-                db.prepare(
-                    'INSERT INTO web_activity (domain, url, duration_seconds, category, visited_at) VALUES (?, ?, ?, ?, ?)'
-                ).run(msg.domain, msg.url ?? msg.domain, duration, category, visitedAt);
+                // Fallback for older agents without visitId
+                db.prepare('INSERT INTO web_activity (domain, url, duration_seconds, category, visited_at) VALUES (?, ?, ?, ?, ?)')
+                    .run(msg.domain, msg.url ?? msg.domain, duration, category, visitedAt);
             }
 
             broadcastToDashboard({
                 type: 'web_activity',
+                visitId,
                 domain: msg.domain,
                 url: msg.url,
                 duration,

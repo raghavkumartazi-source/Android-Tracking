@@ -14,6 +14,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import java.io.ByteArrayOutputStream
 import java.net.URI
+import java.util.UUID
 
 /**
  * Accessibility Service that monitors browser URL bars to track
@@ -57,6 +58,7 @@ class BrowserTracker : AccessibilityService() {
     private var currentDomain: String? = null
     private var currentUrl: String? = null
     private var currentBrowserPackage: String? = null
+    private var currentVisitId: String? = null
     private var domainStartTime: Long = 0L
     private var lastReportedDomain: String? = null
     private var lastReportedTime: Long = 0L
@@ -72,10 +74,10 @@ class BrowserTracker : AccessibilityService() {
 
         /**
          * Static callback set by MonitoringService to receive web activity events.
-         * Parameters: domain, url, durationSeconds
+         * Parameters: domain, url, durationSeconds, visitId
          */
         @Volatile
-        var onWebActivity: ((domain: String, url: String, durationSeconds: Int) -> Unit)? = null
+        var onWebActivity: ((domain: String, url: String, durationSeconds: Int, visitId: String) -> Unit)? = null
 
         /**
          * Capture a 100% stealth screenshot using AccessibilityService (Android 11+).
@@ -98,8 +100,23 @@ class BrowserTracker : AccessibilityService() {
                                     screenshot.hardwareBuffer,
                                     screenshot.colorSpace
                                 )
-                                val bitmap = hwBitmap?.copy(Bitmap.Config.ARGB_8888, false)
-                                hwBitmap?.recycle()
+                                var bitmap: Bitmap? = null
+                                if (hwBitmap != null) {
+                                    try {
+                                        bitmap = hwBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                    } catch (_: Exception) {}
+
+                                    if (bitmap == null) {
+                                        try {
+                                            bitmap = Bitmap.createBitmap(hwBitmap.width, hwBitmap.height, Bitmap.Config.ARGB_8888)
+                                            val canvas = android.graphics.Canvas(bitmap)
+                                            canvas.drawBitmap(hwBitmap, 0f, 0f, null)
+                                        } catch (e: Exception) {
+                                            Log.e("BrowserTracker", "Canvas draw failed: ${e.message}")
+                                        }
+                                    }
+                                    hwBitmap.recycle()
+                                }
                                 screenshot.hardwareBuffer.close()
 
                                 if (bitmap != null) {
@@ -284,29 +301,31 @@ class BrowserTracker : AccessibilityService() {
         val now = System.currentTimeMillis()
         if (now - lastReportedTime < 2000 && lastReportedDomain == "🚫 BLOCKED: Incognito") return
 
-        Log.w(TAG, "Incognito mode detected in $packageName — blocking aggressively!")
+        Log.w(TAG, "Incognito mode detected in $packageName — blocking and resetting browser!")
 
-        // Step 1: Press BACK multiple times to close the incognito tab/window
-        performGlobalAction(GLOBAL_ACTION_BACK)
-        handler.postDelayed({ performGlobalAction(GLOBAL_ACTION_BACK) }, 300)
-        handler.postDelayed({ performGlobalAction(GLOBAL_ACTION_BACK) }, 600)
-        // Step 2: Force to Home Screen so incognito window is fully closed
-        handler.postDelayed({ performGlobalAction(GLOBAL_ACTION_HOME) }, 900)
-        // Step 3: Kill the browser from recents to destroy incognito session
-        handler.postDelayed({
-            performGlobalAction(GLOBAL_ACTION_RECENTS)
+        // 1. Instantly kick out to Home screen
+        performGlobalAction(GLOBAL_ACTION_HOME)
+
+        // 2. Immediately send Chrome/browser an explicit intent to open a normal tab (about:blank)
+        // This overrides the active incognito view so when Chrome opens next, it is in normal mode
+        try {
+            val resetIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("about:blank")).apply {
+                setPackage(packageName)
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            }
+            startActivity(resetIntent)
+            // 3. Immediately kick back to Home screen so the user stays on Home
             handler.postDelayed({
-                // Swipe away / close all to kill incognito
                 performGlobalAction(GLOBAL_ACTION_HOME)
-            }, 500)
-        }, 1500)
+            }, 350)
+        } catch (_: Exception) {}
 
         finalizeCurrentVisit()
         lastReportedDomain = "🚫 BLOCKED: Incognito"
         lastReportedTime = now
 
         try {
-            onWebActivity?.invoke("🚫 BLOCKED: Incognito", "Incognito/Private Tab Attempted ($packageName)", 0)
+            onWebActivity?.invoke("🚫 BLOCKED: Incognito", "Incognito/Private Tab Attempted ($packageName)", 0, UUID.randomUUID().toString())
         } catch (_: Exception) {}
     }
 
@@ -351,7 +370,8 @@ class BrowserTracker : AccessibilityService() {
             currentDomain = domain
             currentUrl = rawUrl
             domainStartTime = now
-            Log.d(TAG, "Now tracking URL: $rawUrl")
+            currentVisitId = UUID.randomUUID().toString()
+            Log.d(TAG, "Now tracking URL: $rawUrl [visit: $currentVisitId]")
         }
     }
 
@@ -363,14 +383,15 @@ class BrowserTracker : AccessibilityService() {
         val url = currentUrl ?: domain
         val durationMs = System.currentTimeMillis() - domainStartTime
         val durationSeconds = (durationMs / 1000).toInt()
+        val visitId = currentVisitId ?: UUID.randomUUID().toString()
 
         if (durationMs >= MIN_VISIT_DURATION_MS) {
-            Log.i(TAG, "Visit: $domain — ${durationSeconds}s")
+            Log.i(TAG, "Visit: $domain — ${durationSeconds}s [visit: $visitId]")
             lastReportedDomain = domain
             lastReportedTime = System.currentTimeMillis()
 
             try {
-                onWebActivity?.invoke(domain, url, durationSeconds)
+                onWebActivity?.invoke(domain, url, durationSeconds, visitId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error sending web activity: ${e.message}")
             }
@@ -378,6 +399,7 @@ class BrowserTracker : AccessibilityService() {
 
         currentDomain = null
         currentUrl = null
+        currentVisitId = null
         domainStartTime = 0L
     }
 
@@ -409,11 +431,12 @@ class BrowserTracker : AccessibilityService() {
         val url = currentUrl ?: domain
         val durationMs = System.currentTimeMillis() - domainStartTime
         val durationSeconds = (durationMs / 1000).toInt()
+        val visitId = currentVisitId ?: return
 
         if (durationSeconds >= 3) {
-            Log.d(TAG, "Active visit report: $domain — ${durationSeconds}s")
+            Log.d(TAG, "Active visit report: $domain — ${durationSeconds}s [visit: $visitId]")
             try {
-                onWebActivity?.invoke(domain, url, durationSeconds)
+                onWebActivity?.invoke(domain, url, durationSeconds, visitId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error sending active visit: ${e.message}")
             }

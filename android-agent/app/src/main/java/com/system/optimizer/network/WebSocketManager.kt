@@ -193,12 +193,13 @@ class WebSocketManager(
         })
     }
 
-    fun sendWebActivity(domain: String, url: String, durationSeconds: Int) {
+    fun sendWebActivity(domain: String, url: String, durationSeconds: Int, visitId: String) {
         send(JSONObject().apply {
             put("type", "web_activity")
             put("domain", domain)
             put("url", url)
             put("duration", durationSeconds)
+            put("visitId", visitId)
             put("timestamp", isoFormat.format(Date()))
         })
     }

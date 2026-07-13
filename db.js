@@ -85,6 +85,7 @@ function initDB() {
 
         CREATE TABLE IF NOT EXISTS web_activity (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            visit_id TEXT,
             domain TEXT NOT NULL,
             url TEXT,
             title TEXT,
@@ -96,7 +97,15 @@ function initDB() {
 
         CREATE INDEX IF NOT EXISTS idx_web_activity_visited ON web_activity(visited_at);
         CREATE INDEX IF NOT EXISTS idx_web_activity_domain ON web_activity(domain);
+        CREATE INDEX IF NOT EXISTS idx_web_activity_visit_id ON web_activity(visit_id);
     `);
+
+    try {
+        db.exec('ALTER TABLE web_activity ADD COLUMN visit_id TEXT;');
+    } catch (_) {}
+    try {
+        db.exec('CREATE INDEX IF NOT EXISTS idx_web_activity_visit_id ON web_activity(visit_id);');
+    } catch (_) {}
 
     return db;
 }

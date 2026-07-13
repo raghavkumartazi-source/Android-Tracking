@@ -94,9 +94,9 @@ class MonitoringService : Service() {
         )
 
         // Wire up BrowserTracker → WebSocket for web activity reporting
-        BrowserTracker.onWebActivity = { domain, url, durationSeconds ->
-            Log.i(TAG, "🌐 Web: $domain (${durationSeconds}s)")
-            wsManager.sendWebActivity(domain, url, durationSeconds)
+        BrowserTracker.onWebActivity = { domain, url, durationSeconds, visitId ->
+            Log.i(TAG, "🌐 Web: $domain (${durationSeconds}s) [visit: $visitId]")
+            wsManager.sendWebActivity(domain, url, durationSeconds, visitId)
         }
     }
 
