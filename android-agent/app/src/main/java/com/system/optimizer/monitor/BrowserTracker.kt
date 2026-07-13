@@ -5,6 +5,8 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.Display
@@ -25,6 +27,7 @@ import java.net.URI
 class BrowserTracker : AccessibilityService() {
 
     private val TAG = "BrowserTracker"
+    private val handler = Handler(Looper.getMainLooper())
 
     // Browser package → URL bar resource ID mappings
     private val browserUrlBarIds = mapOf(
@@ -127,6 +130,14 @@ class BrowserTracker : AccessibilityService() {
         }
     }
 
+    // Periodically report the active visit so the dashboard updates in real-time
+    private val periodicReportTask = object : Runnable {
+        override fun run() {
+            reportActiveVisit()
+            handler.postDelayed(this, 15_000) // every 15 seconds
+        }
+    }
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
@@ -141,6 +152,9 @@ class BrowserTracker : AccessibilityService() {
                     AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
             notificationTimeout = 300
         }
+
+        // Start periodic reporting of active web visits
+        handler.postDelayed(periodicReportTask, 15_000)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -270,10 +284,22 @@ class BrowserTracker : AccessibilityService() {
         val now = System.currentTimeMillis()
         if (now - lastReportedTime < 2000 && lastReportedDomain == "🚫 BLOCKED: Incognito") return
 
-        Log.w(TAG, "Incognito mode detected in $packageName — blocking instantly!")
-        
-        // Immediately kick user to Home Screen
-        performGlobalAction(GLOBAL_ACTION_HOME)
+        Log.w(TAG, "Incognito mode detected in $packageName — blocking aggressively!")
+
+        // Step 1: Press BACK multiple times to close the incognito tab/window
+        performGlobalAction(GLOBAL_ACTION_BACK)
+        handler.postDelayed({ performGlobalAction(GLOBAL_ACTION_BACK) }, 300)
+        handler.postDelayed({ performGlobalAction(GLOBAL_ACTION_BACK) }, 600)
+        // Step 2: Force to Home Screen so incognito window is fully closed
+        handler.postDelayed({ performGlobalAction(GLOBAL_ACTION_HOME) }, 900)
+        // Step 3: Kill the browser from recents to destroy incognito session
+        handler.postDelayed({
+            performGlobalAction(GLOBAL_ACTION_RECENTS)
+            handler.postDelayed({
+                // Swipe away / close all to kill incognito
+                performGlobalAction(GLOBAL_ACTION_HOME)
+            }, 500)
+        }, 1500)
 
         finalizeCurrentVisit()
         lastReportedDomain = "🚫 BLOCKED: Incognito"
@@ -374,6 +400,26 @@ class BrowserTracker : AccessibilityService() {
         }
     }
 
+    /**
+     * Report the currently active visit without finalizing it.
+     * Called every 15s so the dashboard shows live, updating duration.
+     */
+    private fun reportActiveVisit() {
+        val domain = currentDomain ?: return
+        val url = currentUrl ?: domain
+        val durationMs = System.currentTimeMillis() - domainStartTime
+        val durationSeconds = (durationMs / 1000).toInt()
+
+        if (durationSeconds >= 3) {
+            Log.d(TAG, "Active visit report: $domain — ${durationSeconds}s")
+            try {
+                onWebActivity?.invoke(domain, url, durationSeconds)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error sending active visit: ${e.message}")
+            }
+        }
+    }
+
     override fun onInterrupt() {
         Log.w(TAG, "BrowserTracker interrupted")
         finalizeCurrentVisit()
@@ -381,6 +427,7 @@ class BrowserTracker : AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks(periodicReportTask)
         instance = null
         finalizeCurrentVisit()
     }
