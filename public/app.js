@@ -637,8 +637,8 @@ function renderWeeklyChart(daily) {
             datasets: [{
                 label: 'Minutes',
                 data: values,
-                backgroundColor: 'rgba(0, 200, 255, 0.3)',
-                borderColor: 'rgba(0, 200, 255, 0.8)',
+                backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                borderColor: 'rgba(255, 255, 255, 0.85)',
                 borderWidth: 1,
                 borderRadius: 6,
                 borderSkipped: false,
@@ -650,10 +650,10 @@ function renderWeeklyChart(daily) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#111425',
-                    titleColor: '#e8ecf4',
-                    bodyColor: '#8b93a7',
-                    borderColor: 'rgba(255,255,255,0.06)',
+                    backgroundColor: '#080808',
+                    titleColor: '#ffffff',
+                    bodyColor: '#cccccc',
+                    borderColor: 'rgba(255,255,255,0.15)',
                     borderWidth: 1,
                     cornerRadius: 8,
                     callbacks: {
@@ -664,12 +664,12 @@ function renderWeeklyChart(daily) {
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#4a5068', font: { size: 11, family: 'Inter' } }
+                    ticks: { color: '#888888', font: { size: 11, family: 'Inter' } }
                 },
                 y: {
-                    grid: { color: 'rgba(255,255,255,0.03)' },
+                    grid: { color: 'rgba(255,255,255,0.04)' },
                     ticks: {
-                        color: '#4a5068',
+                        color: '#888888',
                         font: { size: 11, family: 'Inter' },
                         callback: v => formatDuration(v * 60)
                     }
@@ -688,18 +688,18 @@ function renderCategoryChart(categories) {
     if (!categories.length) {
         categoryChart = new Chart(ctx, {
             type: 'doughnut',
-            data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['rgba(139,147,167,0.1)'] }] },
+            data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['rgba(255,255,255,0.08)'] }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
         return;
     }
 
     const colorMap = {
-        study: '#00e87b',
-        entertainment: '#ff4060',
-        social: '#8055ff',
-        browser: '#ffb020',
-        other: '#8b93a7'
+        study: '#ffffff',
+        entertainment: '#999999',
+        social: '#dddddd',
+        browser: '#666666',
+        other: '#333333'
     };
 
     categoryChart = new Chart(ctx, {
@@ -721,7 +721,7 @@ function renderCategoryChart(categories) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        color: '#8b93a7',
+                        color: '#aaaaaa',
                         font: { size: 11, family: 'Inter' },
                         padding: 12,
                         usePointStyle: true,
@@ -729,10 +729,10 @@ function renderCategoryChart(categories) {
                     }
                 },
                 tooltip: {
-                    backgroundColor: '#111425',
-                    titleColor: '#e8ecf4',
-                    bodyColor: '#8b93a7',
-                    borderColor: 'rgba(255,255,255,0.06)',
+                    backgroundColor: '#080808',
+                    titleColor: '#ffffff',
+                    bodyColor: '#cccccc',
+                    borderColor: 'rgba(255,255,255,0.15)',
                     borderWidth: 1,
                     cornerRadius: 8,
                     callbacks: {
@@ -813,11 +813,11 @@ function renderApps(apps) {
     document.getElementById('appsLastUpdate').textContent = `Updated: ${formatTime(apps[0]?.reported_at)}`;
 
     const colorMap = {
-        study: { bg: 'var(--success-glow)', color: 'var(--study)' },
-        entertainment: { bg: 'var(--danger-glow)', color: 'var(--entertainment)' },
-        social: { bg: 'var(--purple-glow)', color: 'var(--social)' },
-        browser: { bg: 'var(--warning-glow)', color: 'var(--browser)' },
-        other: { bg: 'rgba(139,147,167,0.08)', color: 'var(--other)' }
+        study: { bg: 'rgba(255,255,255,0.12)', color: '#ffffff' },
+        entertainment: { bg: 'rgba(255,255,255,0.08)', color: '#cccccc' },
+        social: { bg: 'rgba(255,255,255,0.08)', color: '#dddddd' },
+        browser: { bg: 'rgba(255,255,255,0.06)', color: '#aaaaaa' },
+        other: { bg: 'rgba(255,255,255,0.05)', color: '#888888' }
     };
     const icons = { study: '📚', entertainment: '🎮', social: '💬', browser: '🌐', other: '📱' };
 
@@ -979,15 +979,15 @@ function renderWebCategoryChart(summary) {
     const labels = Object.keys(catTotals).map(c => c.charAt(0).toUpperCase() + c.slice(1));
     const data = Object.values(catTotals).map(s => Math.round(s / 60));
     const colors = {
-        Study: '#10b981',
-        Entertainment: '#f59e0b',
-        Social: '#8b5cf6',
-        Shopping: '#ec4899',
-        News: '#3b82f6',
-        Gaming: '#ef4444',
-        Other: '#6b7280'
+        Study: '#ffffff',
+        Entertainment: '#bbbbbb',
+        Social: '#888888',
+        Shopping: '#dddddd',
+        News: '#aaaaaa',
+        Gaming: '#666666',
+        Other: '#444444'
     };
-    const bgColors = labels.map(l => colors[l] || '#6b7280');
+    const bgColors = labels.map(l => colors[l] || '#444444');
 
     const ctx = document.getElementById('webCategoryChart');
     if (webCategoryChart) webCategoryChart.destroy();
@@ -1001,7 +1001,7 @@ function renderWebCategoryChart(summary) {
         type: 'doughnut',
         data: {
             labels,
-            datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }]
+            datasets: [{ data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 8 }]
         },
         options: {
             responsive: true,
@@ -1010,9 +1010,15 @@ function renderWebCategoryChart(summary) {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { color: '#94a3b8', padding: 16, font: { size: 12 } }
+                    labels: { color: '#aaaaaa', padding: 16, font: { size: 12, family: 'Inter' } }
                 },
                 tooltip: {
+                    backgroundColor: '#080808',
+                    titleColor: '#ffffff',
+                    bodyColor: '#cccccc',
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
                     callbacks: {
                         label: ctx => `${ctx.label}: ${ctx.raw}m`
                     }
