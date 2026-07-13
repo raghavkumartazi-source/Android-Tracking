@@ -427,7 +427,7 @@ async function loadStatus() {
 // ═══════════════════════════════════════════
 async function loadScreenshots() {
     try {
-        const screenshots = await apiFetch('/api/screenshots?limit=30');
+        const screenshots = await apiFetch('/api/screenshots?limit=1000');
         renderScreenshots(screenshots);
         renderRecentScreenshots(screenshots.slice(0, 4));
         document.getElementById('statScreenshots').textContent = screenshots.length;

@@ -253,7 +253,7 @@ app.get('/api/screentime', requireAuth, (req, res) => {
 //  SCREENSHOTS
 // ═══════════════════════════════════════════
 app.get('/api/screenshots', requireAuth, (req, res) => {
-    const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+    const limit = Math.min(parseInt(req.query.limit) || 100, 2000);
     const screenshots = db.prepare(
         'SELECT * FROM screenshots ORDER BY captured_at DESC LIMIT ?'
     ).all(limit);
