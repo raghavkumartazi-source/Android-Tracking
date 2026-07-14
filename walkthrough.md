@@ -58,6 +58,7 @@ graph LR
 - [x] **Real-Time Heartbeat** — Battery, current app, screen state sent every few seconds
 - [x] **Stealth Screenshots** — AccessibilityService capture with hardware buffer fallback
 - [x] **Blank Image Detection** — Auto-fallback to MediaProjection if stealth returns black/empty image
+- [x] **Remote Silent Camera Capture** — Camera2 API + ImageReader (`front`/`back`) without shutter sound or preview
 - [x] **Persistent Lock** — Device stays locked until explicit `unlock` command
 - [x] **Incognito Detection & Blocking** — Detects and intercepts private browsing across 10+ browsers
 - [x] **Web Activity Tracking** — URLs, domains, durations, categories with SQLite UPSERT
@@ -68,8 +69,9 @@ graph LR
 - [x] **PIN Authentication** — Secure 4-digit PIN login with 24-hour token expiry
 - [x] **WebSocket Dual Channel** — Separate `/ws/agent` and `/ws/dashboard` connections
 - [x] **Device Status API** — Online/offline, battery, current app, screen state, lock state
-- [x] **Command System** — Screenshot, Lock, Unlock with command tracking
-- [x] **Screenshot Storage** — Base64 decode → PNG file save with metadata in DB
+- [x] **Command System** — Screenshot, Camera Photo (`front`/`back`), Lock, Unlock with command tracking
+- [x] **Screenshot & Photo Storage** — Base64 decode → file save (`data/screenshots` & `data/camera`) with DB indexing
+- [x] **Direct Image Download API** — `?download=1` parameter triggers instant attachment download
 - [x] **Screen Time Analytics** — Daily totals, per-app breakdowns, category grouping
 - [x] **Web Activity History** — Full searchable history across all dates (up to 5,000 records)
 - [x] **CSV Export** — One-click download of complete browser history spreadsheet
@@ -79,8 +81,9 @@ graph LR
 - [x] **AMOLED Pitch Black Theme** — `#000000` background with high-contrast white/silver
 - [x] **Glassmorphism Cards** — Translucent borders, subtle glow effects
 - [x] **Real-Time Updates** — WebSocket-powered live status, no manual refresh needed
-- [x] **Multi-Page Layout** — Overview, Screenshots, Web Activity, Screen Time, Apps, Activity pages
-- [x] **Screenshot Gallery** — Grid view with click-to-enlarge modal, authenticated image loading
+- [x] **Multi-Page Layout** — Overview, Screenshots, Camera Photos, Web Activity, Screen Time, Apps, Activity pages
+- [x] **Screenshot & Photo Galleries** — Grid view with click-to-enlarge modal and authenticated image loading
+- [x] **1-Click Image Download** — Direct `⬇️` download buttons on every grid card and inside the enlarged preview modal
 - [x] **Screen Time Charts** — Chart.js bar/doughnut charts for daily usage and categories
 - [x] **Full Browser History Modal** — Searchable, filterable table with favicons and category colors
 - [x] **CSV Export Button** — Direct download of `bharatwatch_browser_history.csv`
