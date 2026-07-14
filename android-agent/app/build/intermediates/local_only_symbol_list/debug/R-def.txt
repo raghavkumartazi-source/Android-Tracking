@@ -12,11 +12,13 @@ color white
 drawable card_bg
 drawable ic_launcher_foreground
 id btnAccessibility
+id btnCamera
 id btnDeviceAdmin
 id btnStart
 id btnUsageStats
 id checkAccessibility
 id checkAdmin
+id checkCamera
 id checkUsage
 id setupContainer
 id statusContainer

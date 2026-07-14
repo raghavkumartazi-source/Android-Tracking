@@ -720,6 +720,7 @@ id beginning
 id blocking
 id bottom
 id btnAccessibility
+id btnCamera
 id btnDeviceAdmin
 id btnStart
 id btnUsageStats
@@ -727,6 +728,7 @@ id buttonPanel
 id center_vertical
 id checkAccessibility
 id checkAdmin
+id checkCamera
 id checkUsage
 id checkbox
 id checked

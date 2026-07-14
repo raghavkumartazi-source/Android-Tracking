@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val prefs = getSharedPreferences("bw_prefs", MODE_PRIVATE)
-        if (prefs.getBoolean("setup_complete", false)) {
+        if (prefs.getBoolean("setup_complete", false) && hasAllRequiredPermissions()) {
             hideFromLauncher()
             finish()
             return
@@ -55,12 +55,16 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val prefs = getSharedPreferences("bw_prefs", MODE_PRIVATE)
-        if (prefs.getBoolean("setup_complete", false)) {
+        if (prefs.getBoolean("setup_complete", false) && hasAllRequiredPermissions()) {
             hideFromLauncher()
             finish()
         } else {
             refreshPermissionUI()
         }
+    }
+
+    private fun hasAllRequiredPermissions(): Boolean {
+        return hasUsageStatsPermission() && isDeviceAdminActive() && isAccessibilityServiceEnabled() && hasCameraPermission()
     }
 
     // ═══════════════════════════════════════════

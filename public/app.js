@@ -238,9 +238,9 @@ function handleWSMessage(msg) {
             break;
         case 'command_result':
             if (msg.success) {
-                showToast('Command executed', 'success');
+                showToast(msg.result || 'Command executed', 'success');
             } else {
-                showToast('Command failed', 'error');
+                showToast(msg.result || 'Command failed', 'error');
             }
             break;
         case 'web_activity':
