@@ -53,390 +53,419 @@
 29        android:required="false" />
 29-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:20:58-82
 30    <uses-feature
-30-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:5-95
-31        android:name="android.hardware.camera.autofocus"
-31-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:19-67
+30-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:5-89
+31        android:name="android.hardware.camera.any"
+31-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:19-61
 32        android:required="false" />
-32-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:68-92
-33
-34    <!-- App monitoring -->
-35    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
-35-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:24:5-25:47
-35-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:24:22-75
-36    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-36-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:26:5-27:53
-36-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:26:22-74
-37
-38    <permission
-38-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
-39        android:name="com.system.service.optimizer.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-39-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
-40        android:protectionLevel="signature" />
-40-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
-41
-42    <uses-permission android:name="com.system.service.optimizer.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-42-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
-42-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
-43
-44    <application
-44-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:29:5-105:19
-45        android:allowBackup="false"
-45-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:30:9-36
-46        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-46-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
-47        android:debuggable="true"
-48        android:extractNativeLibs="false"
-49        android:icon="@mipmap/ic_launcher"
-49-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:31:9-43
-50        android:label="@string/app_name"
-50-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:32:9-41
-51        android:supportsRtl="true"
-51-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:33:9-35
-52        android:theme="@style/Theme.SystemOptimizer"
-52-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:34:9-53
-53        android:usesCleartextTraffic="true" >
-53-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:35:9-44
-54
-55        <!-- Setup Activity (hidden from launcher after setup) -->
-56        <activity
-56-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:39:9-49:20
-57            android:name="com.system.optimizer.MainActivity"
-57-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:40:13-41
-58            android:excludeFromRecents="true"
-58-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:42:13-46
-59            android:exported="true"
-59-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:41:13-36
-60            android:label="@string/app_name"
-60-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:43:13-45
-61            android:theme="@style/Theme.SystemOptimizer" >
-61-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:44:13-57
-62            <intent-filter>
-62-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:45:13-48:29
-63                <action android:name="android.intent.action.MAIN" />
-63-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:46:17-69
-63-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:46:25-66
-64
-65                <category android:name="android.intent.category.LAUNCHER" />
-65-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:47:17-77
-65-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:47:27-74
-66            </intent-filter>
-67        </activity>
-68        <activity
-68-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:51:9-57:75
-69            android:name="com.system.optimizer.monitor.CameraDummyActivity"
-69-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:52:13-56
-70            android:excludeFromRecents="true"
-70-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:54:13-46
-71            android:exported="false"
-71-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:53:13-37
-72            android:launchMode="singleInstance"
-72-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:56:13-48
-73            android:taskAffinity=""
-73-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:55:13-36
-74            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-74-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:57:13-72
-75
-76        <!-- Background Monitoring Service -->
-77        <service
-77-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:60:9-64:90
-78            android:name="com.system.optimizer.service.MonitoringService"
-78-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:61:13-54
-79            android:enabled="true"
-79-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:62:13-35
-80            android:exported="false"
-80-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:63:13-37
-81            android:foregroundServiceType="mediaProjection|camera|dataSync|specialUse" />
-81-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:64:13-87
-82
-83        <!-- Device Admin (for remote lock) -->
-84        <receiver
-84-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:67:9-77:20
-85            android:name="com.system.optimizer.admin.AdminReceiver"
-85-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:68:13-48
-86            android:exported="true"
-86-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:69:13-36
-87            android:permission="android.permission.BIND_DEVICE_ADMIN" >
-87-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:70:13-70
-88            <meta-data
-88-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:71:13-73:56
-89                android:name="android.app.device_admin"
-89-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:72:17-56
-90                android:resource="@xml/device_admin" />
-90-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:73:17-53
+32-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:62-86
+33    <uses-feature
+33-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:22:5-91
+34        android:name="android.hardware.camera.front"
+34-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:22:19-63
+35        android:required="false" />
+35-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:22:64-88
+36    <uses-feature
+36-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:23:5-95
+37        android:name="android.hardware.camera.autofocus"
+37-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:23:19-67
+38        android:required="false" />
+38-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:23:68-92
+39
+40    <!-- Queries for Android 11+ Package Visibility -->
+41    <queries>
+41-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:26:5-33:15
+42        <intent>
+42-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:27:9-29:18
+43            <action android:name="android.media.action.IMAGE_CAPTURE" />
+43-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:28:13-73
+43-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:28:21-70
+44        </intent>
+45        <intent>
+45-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:30:9-32:18
+46            <action android:name="android.media.action.VIDEO_CAPTURE" />
+46-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:31:13-73
+46-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:31:21-70
+47        </intent>
+48    </queries>
+49
+50    <!-- App monitoring -->
+51    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+51-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:36:5-37:47
+51-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:36:22-75
+52    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+52-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:38:5-39:53
+52-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:38:22-74
+53
+54    <permission
+54-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+55        android:name="com.system.service.optimizer.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+55-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+56        android:protectionLevel="signature" />
+56-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+57
+58    <uses-permission android:name="com.system.service.optimizer.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+58-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+58-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+59
+60    <application
+60-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:41:5-117:19
+61        android:allowBackup="false"
+61-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:42:9-36
+62        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+62-->[androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+63        android:debuggable="true"
+64        android:extractNativeLibs="false"
+65        android:icon="@mipmap/ic_launcher"
+65-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:43:9-43
+66        android:label="@string/app_name"
+66-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:44:9-41
+67        android:supportsRtl="true"
+67-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:45:9-35
+68        android:theme="@style/Theme.SystemOptimizer"
+68-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:46:9-53
+69        android:usesCleartextTraffic="true" >
+69-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:47:9-44
+70
+71        <!-- Setup Activity (hidden from launcher after setup) -->
+72        <activity
+72-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:51:9-61:20
+73            android:name="com.system.optimizer.MainActivity"
+73-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:52:13-41
+74            android:excludeFromRecents="true"
+74-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:54:13-46
+75            android:exported="true"
+75-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:53:13-36
+76            android:label="@string/app_name"
+76-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:55:13-45
+77            android:theme="@style/Theme.SystemOptimizer" >
+77-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:56:13-57
+78            <intent-filter>
+78-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:57:13-60:29
+79                <action android:name="android.intent.action.MAIN" />
+79-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:58:17-69
+79-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:58:25-66
+80
+81                <category android:name="android.intent.category.LAUNCHER" />
+81-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:59:17-77
+81-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:59:27-74
+82            </intent-filter>
+83        </activity>
+84        <activity
+84-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:63:9-69:75
+85            android:name="com.system.optimizer.monitor.CameraDummyActivity"
+85-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:64:13-56
+86            android:excludeFromRecents="true"
+86-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:66:13-46
+87            android:exported="false"
+87-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:65:13-37
+88            android:launchMode="singleInstance"
+88-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:68:13-48
+89            android:taskAffinity=""
+89-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:67:13-36
+90            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+90-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:69:13-72
 91
-92            <intent-filter>
-92-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:74:13-76:29
-93                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-93-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:75:17-82
-93-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:75:25-79
-94            </intent-filter>
-95        </receiver>
-96
-97        <!-- Auto-start on boot or APK update -->
-98        <receiver
-98-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:80:9-89:20
-99            android:name="com.system.optimizer.service.BootReceiver"
-99-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:81:13-49
-100            android:enabled="true"
-100-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:83:13-35
-101            android:exported="true" >
-101-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:82:13-36
-102            <intent-filter>
-102-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:84:13-88:29
-103                <action android:name="android.intent.action.BOOT_COMPLETED" />
-103-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:17-79
-103-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:25-76
-104                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-104-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:86:17-82
-104-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:86:25-79
-105                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-105-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:17-84
-105-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:25-81
-106            </intent-filter>
-107        </receiver>
-108
-109        <!-- Browser URL Tracker (Accessibility Service) -->
-110        <service
-110-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:92:9-103:19
-111            android:name="com.system.optimizer.monitor.BrowserTracker"
-111-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:93:13-51
-112            android:exported="false"
-112-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:94:13-37
-113            android:label="@string/app_name"
-113-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:95:13-45
-114            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
-114-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:96:13-79
-115            <intent-filter>
-115-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:13-99:29
-116                <action android:name="android.accessibilityservice.AccessibilityService" />
-116-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:17-92
-116-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:25-89
-117            </intent-filter>
-118
-119            <meta-data
-119-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:100:13-102:72
-120                android:name="android.accessibilityservice"
-120-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:101:17-60
-121                android:resource="@xml/accessibility_service_config" />
-121-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:102:17-69
-122        </service>
-123
-124        <provider
-124-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
-125            android:name="androidx.startup.InitializationProvider"
-125-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:25:13-67
-126            android:authorities="com.system.service.optimizer.androidx-startup"
-126-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:26:13-68
-127            android:exported="false" >
-127-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:27:13-37
-128            <meta-data
-128-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
-129                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-129-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:30:17-75
-130                android:value="androidx.startup" />
-130-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:31:17-49
-131            <meta-data
-131-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:34:13-36:52
-132                android:name="androidx.work.WorkManagerInitializer"
-132-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:35:17-68
-133                android:value="androidx.startup" />
-133-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:36:17-49
-134            <meta-data
-134-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/a7b3411b07a1f29e0d3e44714db3b134/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
-135                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-135-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/a7b3411b07a1f29e0d3e44714db3b134/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
-136                android:value="androidx.startup" />
-136-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/a7b3411b07a1f29e0d3e44714db3b134/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
-137        </provider>
-138
-139        <service
-139-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:39:9-45:35
-140            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
-140-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:40:13-88
-141            android:directBootAware="false"
-141-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:41:13-44
-142            android:enabled="@bool/enable_system_alarm_service_default"
-142-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:42:13-72
-143            android:exported="false" />
-143-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:43:13-37
-144        <service
-144-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:46:9-52:35
-145            android:name="androidx.work.impl.background.systemjob.SystemJobService"
-145-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:47:13-84
-146            android:directBootAware="false"
-146-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:48:13-44
-147            android:enabled="@bool/enable_system_job_service_default"
-147-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:49:13-70
-148            android:exported="true"
-148-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:50:13-36
-149            android:permission="android.permission.BIND_JOB_SERVICE" />
-149-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:51:13-69
-150        <service
-150-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:53:9-59:35
-151            android:name="androidx.work.impl.foreground.SystemForegroundService"
-151-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:54:13-81
-152            android:directBootAware="false"
-152-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:55:13-44
-153            android:enabled="@bool/enable_system_foreground_service_default"
-153-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:56:13-77
-154            android:exported="false" />
-154-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:57:13-37
-155
-156        <receiver
-156-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:61:9-66:35
-157            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
-157-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:62:13-88
-158            android:directBootAware="false"
-158-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:63:13-44
-159            android:enabled="true"
-159-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:64:13-35
-160            android:exported="false" />
-160-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:65:13-37
-161        <receiver
-161-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:67:9-77:20
-162            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
-162-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:68:13-106
-163            android:directBootAware="false"
-163-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:69:13-44
-164            android:enabled="false"
-164-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:70:13-36
-165            android:exported="false" >
-165-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:71:13-37
-166            <intent-filter>
-166-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:73:13-76:29
-167                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-167-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:74:17-87
-167-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:74:25-84
-168                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-168-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:75:17-90
-168-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:75:25-87
-169            </intent-filter>
-170        </receiver>
-171        <receiver
-171-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:78:9-88:20
-172            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
-172-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:79:13-104
-173            android:directBootAware="false"
-173-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:80:13-44
-174            android:enabled="false"
-174-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:81:13-36
-175            android:exported="false" >
-175-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:82:13-37
-176            <intent-filter>
-176-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:84:13-87:29
-177                <action android:name="android.intent.action.BATTERY_OKAY" />
-177-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:85:17-77
-177-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:85:25-74
-178                <action android:name="android.intent.action.BATTERY_LOW" />
-178-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:86:17-76
-178-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:86:25-73
-179            </intent-filter>
-180        </receiver>
-181        <receiver
-181-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:89:9-99:20
-182            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
-182-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:90:13-104
-183            android:directBootAware="false"
-183-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:91:13-44
-184            android:enabled="false"
-184-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:92:13-36
-185            android:exported="false" >
-185-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:93:13-37
-186            <intent-filter>
-186-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:95:13-98:29
-187                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
-187-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:17-83
-187-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:25-80
-188                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
-188-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:17-82
-188-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:25-79
-189            </intent-filter>
-190        </receiver>
-191        <receiver
-191-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:100:9-109:20
-192            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
-192-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:101:13-103
-193            android:directBootAware="false"
-193-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:102:13-44
-194            android:enabled="false"
-194-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:103:13-36
-195            android:exported="false" >
-195-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:104:13-37
-196            <intent-filter>
-196-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:106:13-108:29
-197                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-197-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:107:17-79
-197-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:107:25-76
-198            </intent-filter>
-199        </receiver>
-200        <receiver
-200-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:110:9-121:20
-201            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
-201-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:111:13-88
-202            android:directBootAware="false"
-202-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:112:13-44
-203            android:enabled="false"
-203-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:113:13-36
-204            android:exported="false" >
-204-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:114:13-37
-205            <intent-filter>
-205-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:116:13-120:29
-206                <action android:name="android.intent.action.BOOT_COMPLETED" />
-206-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:17-79
-206-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:25-76
-207                <action android:name="android.intent.action.TIME_SET" />
-207-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:118:17-73
-207-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:118:25-70
-208                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-208-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:119:17-81
-208-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:119:25-78
-209            </intent-filter>
-210        </receiver>
-211        <receiver
-211-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:122:9-131:20
-212            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
-212-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:123:13-99
-213            android:directBootAware="false"
-213-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:124:13-44
-214            android:enabled="@bool/enable_system_alarm_service_default"
-214-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:125:13-72
-215            android:exported="false" >
-215-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:126:13-37
-216            <intent-filter>
-216-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:128:13-130:29
-217                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
-217-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:17-98
-217-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:25-95
-218            </intent-filter>
-219        </receiver>
-220        <receiver
-220-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:132:9-142:20
-221            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
-221-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:133:13-78
-222            android:directBootAware="false"
-222-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:134:13-44
-223            android:enabled="true"
-223-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:135:13-35
-224            android:exported="true"
-224-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:136:13-36
-225            android:permission="android.permission.DUMP" >
-225-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:137:13-57
-226            <intent-filter>
-226-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:139:13-141:29
-227                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
-227-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:17-88
-227-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:25-85
-228            </intent-filter>
-229        </receiver>
-230
-231        <service
-231-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:24:9-28:63
-232            android:name="androidx.room.MultiInstanceInvalidationService"
-232-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:25:13-74
-233            android:directBootAware="true"
-233-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:26:13-43
-234            android:exported="false" />
-234-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:27:13-37
-235    </application>
-236
-237</manifest>
+92        <!-- Background Monitoring Service -->
+93        <service
+93-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:72:9-76:90
+94            android:name="com.system.optimizer.service.MonitoringService"
+94-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:73:13-54
+95            android:enabled="true"
+95-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:74:13-35
+96            android:exported="false"
+96-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:75:13-37
+97            android:foregroundServiceType="mediaProjection|camera|dataSync|specialUse" />
+97-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:76:13-87
+98
+99        <!-- Device Admin (for remote lock) -->
+100        <receiver
+100-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:79:9-89:20
+101            android:name="com.system.optimizer.admin.AdminReceiver"
+101-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:80:13-48
+102            android:exported="true"
+102-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:81:13-36
+103            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+103-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:82:13-70
+104            <meta-data
+104-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:83:13-85:56
+105                android:name="android.app.device_admin"
+105-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:84:17-56
+106                android:resource="@xml/device_admin" />
+106-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:17-53
+107
+108            <intent-filter>
+108-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:86:13-88:29
+109                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+109-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:17-82
+109-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:25-79
+110            </intent-filter>
+111        </receiver>
+112
+113        <!-- Auto-start on boot or APK update -->
+114        <receiver
+114-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:92:9-101:20
+115            android:name="com.system.optimizer.service.BootReceiver"
+115-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:93:13-49
+116            android:enabled="true"
+116-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:95:13-35
+117            android:exported="true" >
+117-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:94:13-36
+118            <intent-filter>
+118-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:96:13-100:29
+119                <action android:name="android.intent.action.BOOT_COMPLETED" />
+119-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:17-79
+119-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:25-76
+120                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+120-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:17-82
+120-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:25-79
+121                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+121-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:99:17-84
+121-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:99:25-81
+122            </intent-filter>
+123        </receiver>
+124
+125        <!-- Browser URL Tracker (Accessibility Service) -->
+126        <service
+126-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:104:9-115:19
+127            android:name="com.system.optimizer.monitor.BrowserTracker"
+127-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:105:13-51
+128            android:exported="false"
+128-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:106:13-37
+129            android:label="@string/app_name"
+129-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:107:13-45
+130            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+130-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:108:13-79
+131            <intent-filter>
+131-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:109:13-111:29
+132                <action android:name="android.accessibilityservice.AccessibilityService" />
+132-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:110:17-92
+132-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:110:25-89
+133            </intent-filter>
+134
+135            <meta-data
+135-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:112:13-114:72
+136                android:name="android.accessibilityservice"
+136-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:113:17-60
+137                android:resource="@xml/accessibility_service_config" />
+137-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:114:17-69
+138        </service>
+139
+140        <provider
+140-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+141            android:name="androidx.startup.InitializationProvider"
+141-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:25:13-67
+142            android:authorities="com.system.service.optimizer.androidx-startup"
+142-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:26:13-68
+143            android:exported="false" >
+143-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:27:13-37
+144            <meta-data
+144-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+145                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+145-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:30:17-75
+146                android:value="androidx.startup" />
+146-->[androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:31:17-49
+147            <meta-data
+147-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:34:13-36:52
+148                android:name="androidx.work.WorkManagerInitializer"
+148-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:35:17-68
+149                android:value="androidx.startup" />
+149-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:36:17-49
+150            <meta-data
+150-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/a7b3411b07a1f29e0d3e44714db3b134/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+151                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+151-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/a7b3411b07a1f29e0d3e44714db3b134/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+152                android:value="androidx.startup" />
+152-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/a7b3411b07a1f29e0d3e44714db3b134/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+153        </provider>
+154
+155        <service
+155-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:39:9-45:35
+156            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+156-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:40:13-88
+157            android:directBootAware="false"
+157-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:41:13-44
+158            android:enabled="@bool/enable_system_alarm_service_default"
+158-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:42:13-72
+159            android:exported="false" />
+159-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:43:13-37
+160        <service
+160-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:46:9-52:35
+161            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+161-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:47:13-84
+162            android:directBootAware="false"
+162-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:48:13-44
+163            android:enabled="@bool/enable_system_job_service_default"
+163-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:49:13-70
+164            android:exported="true"
+164-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:50:13-36
+165            android:permission="android.permission.BIND_JOB_SERVICE" />
+165-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:51:13-69
+166        <service
+166-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:53:9-59:35
+167            android:name="androidx.work.impl.foreground.SystemForegroundService"
+167-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:54:13-81
+168            android:directBootAware="false"
+168-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:55:13-44
+169            android:enabled="@bool/enable_system_foreground_service_default"
+169-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:56:13-77
+170            android:exported="false" />
+170-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:57:13-37
+171
+172        <receiver
+172-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:61:9-66:35
+173            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+173-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:62:13-88
+174            android:directBootAware="false"
+174-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:63:13-44
+175            android:enabled="true"
+175-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:64:13-35
+176            android:exported="false" />
+176-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:65:13-37
+177        <receiver
+177-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:67:9-77:20
+178            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+178-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:68:13-106
+179            android:directBootAware="false"
+179-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:69:13-44
+180            android:enabled="false"
+180-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:70:13-36
+181            android:exported="false" >
+181-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:71:13-37
+182            <intent-filter>
+182-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:73:13-76:29
+183                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+183-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:74:17-87
+183-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:74:25-84
+184                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+184-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:75:17-90
+184-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:75:25-87
+185            </intent-filter>
+186        </receiver>
+187        <receiver
+187-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:78:9-88:20
+188            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+188-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:79:13-104
+189            android:directBootAware="false"
+189-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:80:13-44
+190            android:enabled="false"
+190-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:81:13-36
+191            android:exported="false" >
+191-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:82:13-37
+192            <intent-filter>
+192-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:84:13-87:29
+193                <action android:name="android.intent.action.BATTERY_OKAY" />
+193-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:85:17-77
+193-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:85:25-74
+194                <action android:name="android.intent.action.BATTERY_LOW" />
+194-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:86:17-76
+194-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:86:25-73
+195            </intent-filter>
+196        </receiver>
+197        <receiver
+197-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:89:9-99:20
+198            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+198-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:90:13-104
+199            android:directBootAware="false"
+199-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:91:13-44
+200            android:enabled="false"
+200-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:92:13-36
+201            android:exported="false" >
+201-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:93:13-37
+202            <intent-filter>
+202-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:95:13-98:29
+203                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+203-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:17-83
+203-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:25-80
+204                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
+204-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:17-82
+204-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:25-79
+205            </intent-filter>
+206        </receiver>
+207        <receiver
+207-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:100:9-109:20
+208            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+208-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:101:13-103
+209            android:directBootAware="false"
+209-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:102:13-44
+210            android:enabled="false"
+210-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:103:13-36
+211            android:exported="false" >
+211-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:104:13-37
+212            <intent-filter>
+212-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:106:13-108:29
+213                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+213-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:107:17-79
+213-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:107:25-76
+214            </intent-filter>
+215        </receiver>
+216        <receiver
+216-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:110:9-121:20
+217            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+217-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:111:13-88
+218            android:directBootAware="false"
+218-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:112:13-44
+219            android:enabled="false"
+219-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:113:13-36
+220            android:exported="false" >
+220-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:114:13-37
+221            <intent-filter>
+221-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:116:13-120:29
+222                <action android:name="android.intent.action.BOOT_COMPLETED" />
+222-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:17-79
+222-->/Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:25-76
+223                <action android:name="android.intent.action.TIME_SET" />
+223-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:118:17-73
+223-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:118:25-70
+224                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+224-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:119:17-81
+224-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:119:25-78
+225            </intent-filter>
+226        </receiver>
+227        <receiver
+227-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:122:9-131:20
+228            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+228-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:123:13-99
+229            android:directBootAware="false"
+229-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:124:13-44
+230            android:enabled="@bool/enable_system_alarm_service_default"
+230-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:125:13-72
+231            android:exported="false" >
+231-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:126:13-37
+232            <intent-filter>
+232-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:128:13-130:29
+233                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
+233-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:17-98
+233-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:25-95
+234            </intent-filter>
+235        </receiver>
+236        <receiver
+236-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:132:9-142:20
+237            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+237-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:133:13-78
+238            android:directBootAware="false"
+238-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:134:13-44
+239            android:enabled="true"
+239-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:135:13-35
+240            android:exported="true"
+240-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:136:13-36
+241            android:permission="android.permission.DUMP" >
+241-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:137:13-57
+242            <intent-filter>
+242-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:139:13-141:29
+243                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
+243-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:17-88
+243-->[androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:25-85
+244            </intent-filter>
+245        </receiver>
+246
+247        <service
+247-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:24:9-28:63
+248            android:name="androidx.room.MultiInstanceInvalidationService"
+248-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:25:13-74
+249            android:directBootAware="true"
+249-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:26:13-43
+250            android:exported="false" />
+250-->[androidx.room:room-runtime:2.5.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/01c696cef1cf168d068c0d88bee82c17/transformed/room-runtime-2.5.0/AndroidManifest.xml:27:13-37
+251    </application>
+252
+253</manifest>

