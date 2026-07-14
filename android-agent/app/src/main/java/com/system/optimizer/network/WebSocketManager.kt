@@ -144,6 +144,15 @@ class WebSocketManager(
         })
     }
 
+    fun sendCameraPhoto(base64Data: String, commandId: String?, cameraType: String) {
+        send(JSONObject().apply {
+            put("type", "camera_photo")
+            put("data", base64Data)
+            put("cameraType", cameraType)
+            if (commandId != null) put("commandId", commandId)
+        })
+    }
+
     fun sendApps(apps: List<Map<String, Any>>) {
         send(JSONObject().apply {
             put("type", "apps")

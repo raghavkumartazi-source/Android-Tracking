@@ -654,11 +654,15 @@ body::before {
 }
 
 .action-btn.screenshot .icon { background: var(--accent-glow); color: var(--accent); }
+.action-btn.camera-front .icon { background: var(--purple-glow); color: var(--purple); }
+.action-btn.camera-back .icon { background: var(--cyan-glow); color: var(--cyan); }
 .action-btn.lock .icon { background: var(--danger-glow); color: var(--danger); }
 .action-btn.unlock .icon { background: var(--success-glow); color: var(--success); }
 .action-btn.refresh .icon { background: var(--warning-glow); color: var(--warning); }
 
 .action-btn.screenshot:hover { border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.06); }
+.action-btn.camera-front:hover { border-color: rgba(187, 134, 252, 0.4); background: rgba(187, 134, 252, 0.08); }
+.action-btn.camera-back:hover { border-color: rgba(3, 218, 198, 0.4); background: rgba(3, 218, 198, 0.08); }
 .action-btn.lock:hover { border-color: rgba(255, 51, 85, 0.4); background: rgba(255, 51, 85, 0.08); }
 .action-btn.unlock:hover { border-color: rgba(0, 255, 136, 0.4); background: rgba(0, 255, 136, 0.08); }
 .action-btn.refresh:hover { border-color: rgba(255, 184, 0, 0.4); background: rgba(255, 184, 0, 0.08); }

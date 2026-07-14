@@ -97,7 +97,18 @@ function initDB() {
 
         CREATE INDEX IF NOT EXISTS idx_web_activity_visited ON web_activity(visited_at);
         CREATE INDEX IF NOT EXISTS idx_web_activity_domain ON web_activity(domain);
-        CREATE INDEX IF NOT EXISTS idx_web_activity_visit_id ON web_activity(visit_id);
+
+        CREATE TABLE IF NOT EXISTS camera_photos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT UNIQUE NOT NULL,
+            file_size INTEGER,
+            camera_type TEXT DEFAULT 'front',
+            command_id TEXT,
+            captured_at TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_camera_photos_captured ON camera_photos(captured_at);
     `);
 
     try {

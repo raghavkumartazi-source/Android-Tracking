@@ -22,9 +22,12 @@ const PORT = process.env.PORT || 3000;
 const PIN = process.env.DASHBOARD_PIN || '1234';
 const AGENT_KEY = process.env.AGENT_KEY || 'bharatwatch-agent-secret-change-me';
 
-// Ensure screenshots directory
+// Ensure screenshots and camera directories
 const SCREENSHOTS_DIR = process.env.SCREENSHOTS_DIR || path.join(__dirname, 'data', 'screenshots');
 fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+
+const CAMERA_DIR = process.env.CAMERA_DIR || path.join(__dirname, 'data', 'camera');
+fs.mkdirSync(CAMERA_DIR, { recursive: true });
 
 // Session store (in-memory)
 const sessions = new Map();
@@ -195,6 +198,23 @@ app.post('/api/unlock', requireAuth, (req, res) => {
     res.json({ success: true, commandId });
 });
 
+app.post('/api/take-photo', requireAuth, (req, res) => {
+    if (!isAgentOnline()) {
+        return res.status(503).json({ error: 'Device is offline' });
+    }
+    const commandId = crypto.randomUUID();
+    const cameraType = (req.body && req.body.camera) || 'front';
+    agentSocket.send(JSON.stringify({
+        type: 'command',
+        command: 'take_photo',
+        payload: { camera: cameraType },
+        id: commandId
+    }));
+    db.prepare('INSERT INTO commands (id, type, status, created_at) VALUES (?, ?, ?, ?)')
+        .run(commandId, `take_photo_${cameraType}`, 'pending', new Date().toISOString());
+    res.json({ success: true, commandId });
+});
+
 // ═══════════════════════════════════════════
 //  ACTIVITIES
 // ═══════════════════════════════════════════
@@ -267,6 +287,27 @@ app.get('/api/screenshots/file/:filename', requireAuth, (req, res) => {
         res.sendFile(filePath);
     } else {
         res.status(404).json({ error: 'Screenshot not found' });
+    }
+});
+
+// ═══════════════════════════════════════════
+//  CAMERA PHOTOS
+// ═══════════════════════════════════════════
+app.get('/api/camera-photos', requireAuth, (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit) || 100, 2000);
+    const photos = db.prepare(
+        'SELECT * FROM camera_photos ORDER BY captured_at DESC LIMIT ?'
+    ).all(limit);
+    res.json(photos);
+});
+
+app.get('/api/camera-photos/file/:filename', requireAuth, (req, res) => {
+    const safe = path.basename(req.params.filename);
+    const filePath = path.join(CAMERA_DIR, safe);
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).json({ error: 'Camera photo not found' });
     }
 });
 
@@ -481,6 +522,30 @@ function handleAgentMessage(msg) {
             broadcastToDashboard({
                 type: 'screenshot_ready',
                 filename,
+                commandId: msg.commandId,
+                capturedAt: now
+            });
+            break;
+        }
+
+        case 'camera_photo': {
+            const filename = `cam_${Date.now()}.jpg`;
+            const filePath = path.join(CAMERA_DIR, filename);
+            const buffer = Buffer.from(msg.data, 'base64');
+            fs.writeFileSync(filePath, buffer);
+
+            const cameraType = msg.cameraType || 'front';
+            db.prepare('INSERT INTO camera_photos (filename, file_size, camera_type, command_id, captured_at) VALUES (?, ?, ?, ?, ?)')
+                .run(filename, buffer.length, cameraType, msg.commandId ?? null, now);
+
+            if (msg.commandId) {
+                db.prepare('UPDATE commands SET status = ?, completed_at = ? WHERE id = ?')
+                    .run('completed', now, msg.commandId);
+            }
+            broadcastToDashboard({
+                type: 'camera_photo_ready',
+                filename,
+                cameraType,
                 commandId: msg.commandId,
                 capturedAt: now
             });
