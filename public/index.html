@@ -147,7 +147,7 @@
                     <div class="card-value" id="statStatus">Offline</div>
                     <div class="card-sub" id="statLastSeen">Never connected</div>
                 </div>
-                <div class="card stat-card">
+                <div class="card stat-card" onclick="switchPage('screentime')" style="cursor:pointer;">
                     <div class="card-header">
                         <span class="card-title">Today's Screen Time</span>
                         <div class="card-icon success">⏱️</div>
@@ -155,7 +155,7 @@
                     <div class="card-value" id="statScreenTime">0h 0m</div>
                     <div class="card-sub" id="statScreenTimeSub">No data yet</div>
                 </div>
-                <div class="card stat-card">
+                <div class="card stat-card" onclick="switchPage('screenshots')" style="cursor:pointer;">
                     <div class="card-header">
                         <span class="card-title">Screenshots</span>
                         <div class="card-icon warning">📸</div>
@@ -163,7 +163,23 @@
                     <div class="card-value" id="statScreenshots">0</div>
                     <div class="card-sub">Captured today</div>
                 </div>
-                <div class="card stat-card">
+                <div class="card stat-card" onclick="switchPage('camera')" style="cursor:pointer;">
+                    <div class="card-header">
+                        <span class="card-title">Camera Photos</span>
+                        <div class="card-icon warning">🤳</div>
+                    </div>
+                    <div class="card-value" id="statCameraPhotos">0</div>
+                    <div class="card-sub">Silent captures</div>
+                </div>
+                <div class="card stat-card" onclick="switchPage('web')" style="cursor:pointer;">
+                    <div class="card-header">
+                        <span class="card-title">Web Activity</span>
+                        <div class="card-icon accent">🌐</div>
+                    </div>
+                    <div class="card-value" id="statWebActivity">0</div>
+                    <div class="card-sub">Sites visited</div>
+                </div>
+                <div class="card stat-card" onclick="switchPage('activity')" style="cursor:pointer;">
                     <div class="card-header">
                         <span class="card-title">Activities</span>
                         <div class="card-icon purple">📊</div>

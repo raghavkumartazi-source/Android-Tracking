@@ -244,10 +244,7 @@ function handleWSMessage(msg) {
             }
             break;
         case 'web_activity':
-            // Real-time: if on web page, refresh data
-            if (document.getElementById('webPage')?.classList.contains('active')) {
-                loadWebActivity();
-            }
+            loadWebActivity();
             break;
     }
 }
@@ -435,6 +432,7 @@ async function refreshAll() {
     loadActivities();
     loadScreenTime();
     loadApps();
+    loadWebActivity();
 }
 
 // ═══════════════════════════════════════════
@@ -566,6 +564,8 @@ async function loadCameraPhotos() {
     try {
         const photos = await apiFetch('/api/camera-photos?limit=1000');
         renderCameraPhotos(photos);
+        const statEl = document.getElementById('statCameraPhotos');
+        if (statEl) statEl.textContent = photos.length;
     } catch {}
 }
 
@@ -1015,6 +1015,8 @@ function renderWebStats(summary) {
     
     document.getElementById('webTotalSites').textContent = totalSites;
     document.getElementById('webTotalTime').textContent = formatDuration(totalSeconds);
+    const statWebEl = document.getElementById('statWebActivity');
+    if (statWebEl) statWebEl.textContent = totalSites;
     
     // Find top category
     const catTotals = {};
