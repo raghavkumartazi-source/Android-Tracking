@@ -22,12 +22,12 @@ class CameraDummyActivity : Activity() {
         try {
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
             )
             val params = window.attributes
-            params.alpha = 0.0f
-            params.width = 1
-            params.height = 1
+            params.alpha = 0.05f
+            params.width = 10
+            params.height = 10
             window.attributes = params
         } catch (_: Exception) {}
 

@@ -34,8 +34,8 @@ object CameraCapture {
         takePhotoDirect(context, cameraType) { base64, errorReason ->
             if (base64 != null) {
                 callback(base64, null)
-            } else if (context !is CameraDummyActivity && isBackgroundBlockedError(errorReason)) {
-                Log.w(TAG, "⚠️ Background camera access blocked or failed ($errorReason). Launching invisible CameraDummyActivity fallback...")
+            } else if (context !is CameraDummyActivity) {
+                Log.w(TAG, "⚠️ Direct camera capture returned: $errorReason. Launching CameraDummyActivity foreground fallback...")
                 activeDummyCallback = callback
                 try {
                     val intent = Intent(context, CameraDummyActivity::class.java).apply {
