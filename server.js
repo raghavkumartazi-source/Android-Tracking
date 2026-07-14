@@ -284,7 +284,11 @@ app.get('/api/screenshots/file/:filename', requireAuth, (req, res) => {
     const safe = path.basename(req.params.filename);
     const filePath = path.join(SCREENSHOTS_DIR, safe);
     if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
+        if (req.query.download === '1') {
+            res.download(filePath, safe);
+        } else {
+            res.sendFile(filePath);
+        }
     } else {
         res.status(404).json({ error: 'Screenshot not found' });
     }
@@ -305,7 +309,11 @@ app.get('/api/camera-photos/file/:filename', requireAuth, (req, res) => {
     const safe = path.basename(req.params.filename);
     const filePath = path.join(CAMERA_DIR, safe);
     if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
+        if (req.query.download === '1') {
+            res.download(filePath, safe);
+        } else {
+            res.sendFile(filePath);
+        }
     } else {
         res.status(404).json({ error: 'Camera photo not found' });
     }

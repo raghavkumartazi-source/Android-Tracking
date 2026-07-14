@@ -437,7 +437,10 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <span class="modal-title" id="modalTitle">Screenshot</span>
-            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                <button class="btn btn-sm" id="modalDownloadBtn" onclick="downloadModalImage()" style="background:#fff; color:#000; font-weight:600;">⬇️ Download Image</button>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
         </div>
         <div class="modal-body">
             <img id="modalImage" src="" alt="Screenshot">

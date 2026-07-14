@@ -476,9 +476,12 @@ function renderScreenshots(screenshots) {
             <div class="screenshot-thumb">
                 <img src="/api/screenshots/file/${s.filename}?token=${authToken}" alt="Screenshot" loading="lazy">
             </div>
-            <div class="screenshot-meta">
-                <span class="screenshot-time">${formatTime(s.captured_at)}</span>
-                <span class="screenshot-size">${formatBytes(s.file_size)}</span>
+            <div class="screenshot-meta" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div style="overflow:hidden;">
+                    <span class="screenshot-time" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${formatTime(s.captured_at)}</span>
+                    <span class="screenshot-size" style="display:block;">${formatBytes(s.file_size)}</span>
+                </div>
+                <button class="btn btn-sm" onclick="event.stopPropagation(); downloadDirectFile('${s.filename}', 'screenshots');" title="Download Screenshot" style="padding:4px 8px; font-size:0.85rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:6px; color:#fff; flex-shrink:0;">⬇️</button>
             </div>
         </div>
     `).join('');
@@ -503,12 +506,36 @@ function renderRecentScreenshots(screenshots) {
                     <div class="screenshot-thumb" style="aspect-ratio:16/10">
                         <img src="/api/screenshots/file/${s.filename}?token=${authToken}" alt="Screenshot" loading="lazy" style="width:100%;height:100%;object-fit:cover">
                     </div>
-                    <div style="padding:8px 10px">
-                        <span class="screenshot-time" style="font-size:0.6875rem">${formatTime(s.captured_at)}</span>
+                    <div style="padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span class="screenshot-time" style="font-size:0.6875rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${formatTime(s.captured_at)}</span>
+                        <button class="btn btn-sm" onclick="event.stopPropagation(); downloadDirectFile('${s.filename}', 'screenshots');" title="Download Screenshot" style="padding:2px 6px; font-size:0.7rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:4px; color:#fff;">⬇️</button>
                     </div>
                 </div>
             `).join('')}
         </div>`;
+}
+
+let currentModalDownloadUrl = '';
+
+function downloadModalImage() {
+    if (!currentModalDownloadUrl) return;
+    const a = document.createElement('a');
+    a.href = currentModalDownloadUrl;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function downloadDirectFile(filename, folderType) {
+    if (!authToken) return;
+    const url = `/api/${folderType}/file/${filename}?token=${authToken}&download=1`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 function openScreenshot(filename, time) {
@@ -517,6 +544,7 @@ function openScreenshot(filename, time) {
     const title = document.getElementById('modalTitle');
 
     img.src = `/api/screenshots/file/${filename}?token=${authToken}`;
+    currentModalDownloadUrl = `/api/screenshots/file/${filename}?token=${authToken}&download=1`;
     title.textContent = `Screenshot — ${time}`;
     modal.classList.add('active');
 }
@@ -559,9 +587,12 @@ function renderCameraPhotos(photos) {
             <div class="screenshot-thumb">
                 <img src="/api/camera-photos/file/${p.filename}?token=${authToken}" alt="Camera Photo" loading="lazy">
             </div>
-            <div class="screenshot-meta">
-                <span class="screenshot-time">${formatTime(p.captured_at)} (${(p.camera_type || 'front').toUpperCase()})</span>
-                <span class="screenshot-size">${formatBytes(p.file_size)}</span>
+            <div class="screenshot-meta" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div style="overflow:hidden;">
+                    <span class="screenshot-time" style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${formatTime(p.captured_at)} (${(p.camera_type || 'front').toUpperCase()})</span>
+                    <span class="screenshot-size" style="display:block;">${formatBytes(p.file_size)}</span>
+                </div>
+                <button class="btn btn-sm" onclick="event.stopPropagation(); downloadDirectFile('${p.filename}', 'camera-photos');" title="Download Camera Photo" style="padding:4px 8px; font-size:0.85rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:6px; color:#fff; flex-shrink:0;">⬇️</button>
             </div>
         </div>
     `).join('');
@@ -573,6 +604,7 @@ function openCameraPhoto(filename, time, cameraType) {
     const title = document.getElementById('modalTitle');
 
     img.src = `/api/camera-photos/file/${filename}?token=${authToken}`;
+    currentModalDownloadUrl = `/api/camera-photos/file/${filename}?token=${authToken}&download=1`;
     title.textContent = `Camera Photo (${cameraType.toUpperCase()}) — ${time}`;
     modal.classList.add('active');
 }
