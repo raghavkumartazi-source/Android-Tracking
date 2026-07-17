@@ -31,7 +31,7 @@ object Config {
     // ═══════════════════════════════════════════
     const val HEARTBEAT_INTERVAL = 15_000L      // Send heartbeat every 15s
     const val APP_REPORT_INTERVAL = 30_000L     // Report running apps every 30s
-    const val SCREEN_TIME_INTERVAL = 300_000L   // Report screen time every 5min
+    const val SCREEN_TIME_INTERVAL = 60_000L    // Report screen time every 1min
     const val RECONNECT_BASE_DELAY = 3_000L     // Initial reconnect wait
     const val RECONNECT_MAX_DELAY = 60_000L     // Max reconnect wait (1min)
 

@@ -194,6 +194,23 @@ class BrowserTracker : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: return
 
+        // Check if this package is restricted by Parental Controls (Always Block / Study Hours / Daily Quota)
+        val (isRestricted, reason) = AppBlockManager.checkIsRestricted(packageName)
+        if (isRestricted && reason != null) {
+            // Get clean app name if possible or fallback to package name
+            val appName = try {
+                val info = packageManager.getApplicationInfo(packageName, 0)
+                packageManager.getApplicationLabel(info).toString()
+            } catch (_: Exception) {
+                packageName.substringAfterLast('.')
+            }
+            AppBlockManager.enforceBlock(this, packageName, appName, reason)
+            if (currentDomain != null) {
+                finalizeCurrentVisit()
+            }
+            return
+        }
+
         // Only process events from known browser apps
         if (packageName !in allBrowserPackages) {
             // If user switched AWAY from a browser, finalize the current visit

@@ -18,6 +18,17 @@ class WebSocketManager(
     private val onConnected: () -> Unit,
     private val onDisconnected: () -> Unit
 ) {
+    companion object {
+        @Volatile
+        private var instance: WebSocketManager? = null
+
+        fun getInstance(): WebSocketManager? = instance
+    }
+
+    init {
+        instance = this
+    }
+
     private val TAG = "WSManager"
 
     private val client = OkHttpClient.Builder()
@@ -34,6 +45,7 @@ class WebSocketManager(
     private val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
+    private val localDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     // ═══════════════════════════════════════════
     //  Connect / Disconnect
@@ -175,12 +187,14 @@ class WebSocketManager(
             put("packageName", packageName)
             put("eventType", eventType)
             put("timestamp", isoFormat.format(Date()))
+            put("date", localDateFormat.format(Date()))
         })
     }
 
     fun sendScreenTimeUpdate(entries: List<Map<String, Any>>) {
         send(JSONObject().apply {
             put("type", "screen_time_update")
+            put("date", localDateFormat.format(Date()))
             put("entries", JSONArray().apply {
                 entries.forEach { e ->
                     put(JSONObject().apply {
@@ -209,6 +223,16 @@ class WebSocketManager(
             put("url", url)
             put("duration", durationSeconds)
             put("visitId", visitId)
+            put("timestamp", isoFormat.format(Date()))
+        })
+    }
+
+    fun sendBlockedAttempt(packageName: String, appName: String, reason: String) {
+        send(JSONObject().apply {
+            put("type", "blocked_attempt")
+            put("package", packageName)
+            put("appName", appName)
+            put("reason", reason)
             put("timestamp", isoFormat.format(Date()))
         })
     }

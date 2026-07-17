@@ -33,6 +33,7 @@ function initDB() {
             file_size INTEGER,
             command_id TEXT,
             captured_at TEXT NOT NULL,
+            capture_type TEXT DEFAULT 'manual',
             created_at TEXT DEFAULT (datetime('now'))
         );
 
@@ -109,6 +110,27 @@ function initDB() {
         );
 
         CREATE INDEX IF NOT EXISTS idx_camera_photos_captured ON camera_photos(captured_at);
+
+        CREATE TABLE IF NOT EXISTS blocked_apps (
+            package_name TEXT PRIMARY KEY,
+            app_name TEXT NOT NULL,
+            is_blocked INTEGER DEFAULT 1,
+            schedule_start TEXT DEFAULT NULL,
+            schedule_end TEXT DEFAULT NULL,
+            daily_quota_minutes INTEGER DEFAULT 0,
+            updated_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS blocked_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            package_name TEXT NOT NULL,
+            app_name TEXT NOT NULL,
+            reason TEXT,
+            attempted_at TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_blocked_attempts_time ON blocked_attempts(attempted_at);
     `);
 
     try {
@@ -116,6 +138,9 @@ function initDB() {
     } catch (_) {}
     try {
         db.exec('CREATE INDEX IF NOT EXISTS idx_web_activity_visit_id ON web_activity(visit_id);');
+    } catch (_) {}
+    try {
+        db.exec("ALTER TABLE screenshots ADD COLUMN capture_type TEXT DEFAULT 'manual';");
     } catch (_) {}
 
     return db;

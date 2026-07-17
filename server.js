@@ -71,6 +71,25 @@ function isAgentOnline() {
     return agentSocket && agentSocket.readyState === WebSocket.OPEN;
 }
 
+function sendBlockedAppsSync() {
+    try {
+        const rules = db.prepare('SELECT * FROM blocked_apps').all();
+        if (agentSocket && agentSocket.readyState === WebSocket.OPEN) {
+            agentSocket.send(JSON.stringify({
+                type: 'command',
+                command: 'blocked_apps_sync',
+                rules: rules
+            }));
+        }
+        broadcastToDashboard({
+            type: 'blocked_apps_sync',
+            rules: rules
+        });
+    } catch (e) {
+        console.error('Error sending blocked apps sync:', e);
+    }
+}
+
 // ═══════════════════════════════════════════
 //  App Categorization
 // ═══════════════════════════════════════════
@@ -122,6 +141,15 @@ function categorizeWebDomain(domain) {
         return 'gaming';
     }
     return 'other';
+}
+
+function getLocalDateString(d = new Date()) {
+    const dateObj = typeof d === 'string' ? new Date(d) : d;
+    if (isNaN(dateObj.getTime())) return new Date().toISOString().split('T')[0];
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // ═══════════════════════════════════════════
@@ -244,7 +272,7 @@ app.get('/api/apps', requireAuth, (req, res) => {
 //  SCREEN TIME
 // ═══════════════════════════════════════════
 app.get('/api/screentime', requireAuth, (req, res) => {
-    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const date = req.query.date || getLocalDateString();
     const days = Math.min(parseInt(req.query.days) || 7, 30);
 
     const daily = db.prepare(`
@@ -323,7 +351,7 @@ app.get('/api/camera-photos/file/:filename', requireAuth, (req, res) => {
 //  WEB ACTIVITY
 // ═══════════════════════════════════════════
 app.get('/api/web-activity', requireAuth, (req, res) => {
-    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const date = req.query.date || getLocalDateString();
     const limit = Math.min(parseInt(req.query.limit) || 100, 1000);
     const visits = db.prepare(
         `SELECT * FROM web_activity 
@@ -334,7 +362,7 @@ app.get('/api/web-activity', requireAuth, (req, res) => {
 });
 
 app.get('/api/web-activity/summary', requireAuth, (req, res) => {
-    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const date = req.query.date || getLocalDateString();
     const summary = db.prepare(
         `SELECT domain, category,
                 COUNT(*) as visit_count,
@@ -402,6 +430,139 @@ app.get('/api/commands/:id', requireAuth, (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+//  PARENTAL CONTROLS: BLOCKED APPS & QUOTAS
+// ═══════════════════════════════════════════
+app.get('/api/blocked-apps', requireAuth, (req, res) => {
+    try {
+        const rules = db.prepare('SELECT * FROM blocked_apps').all();
+        res.json(rules);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/blocked-apps', requireAuth, (req, res) => {
+    try {
+        const { package_name, app_name, is_blocked, schedule_start, schedule_end, daily_quota_minutes } = req.body;
+        if (!package_name || !app_name) {
+            return res.status(400).json({ error: 'Package name and app name are required' });
+        }
+        db.prepare(`
+            INSERT INTO blocked_apps (package_name, app_name, is_blocked, schedule_start, schedule_end, daily_quota_minutes, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(package_name) DO UPDATE SET
+                app_name = excluded.app_name,
+                is_blocked = excluded.is_blocked,
+                schedule_start = excluded.schedule_start,
+                schedule_end = excluded.schedule_end,
+                daily_quota_minutes = excluded.daily_quota_minutes,
+                updated_at = datetime('now')
+        `).run(package_name, app_name, is_blocked !== undefined ? (is_blocked ? 1 : 0) : 1, schedule_start || null, schedule_end || null, daily_quota_minutes || 0);
+
+        sendBlockedAppsSync();
+        res.json({ success: true, package_name });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.delete('/api/blocked-apps/:package_name', requireAuth, (req, res) => {
+    try {
+        db.prepare('DELETE FROM blocked_apps WHERE package_name = ?').run(req.params.package_name);
+        sendBlockedAppsSync();
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/blocked-attempts', requireAuth, (req, res) => {
+    try {
+        const attempts = db.prepare('SELECT * FROM blocked_attempts ORDER BY attempted_at DESC LIMIT 50').all();
+        res.json(attempts);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ═══════════════════════════════════════════
+//  DAILY DIGEST & EXPORT API
+// ═══════════════════════════════════════════
+app.get('/api/reports/daily', requireAuth, (req, res) => {
+    try {
+        const date = req.query.date || getLocalDateString();
+        const screenTime = db.prepare('SELECT * FROM screen_time WHERE date = ? ORDER BY seconds DESC').all(date);
+        const webActivity = db.prepare('SELECT * FROM web_activity WHERE visited_at LIKE ? ORDER BY duration_seconds DESC').all(`${date}%`);
+        const blockedAttempts = db.prepare('SELECT * FROM blocked_attempts WHERE attempted_at LIKE ? ORDER BY attempted_at DESC').all(`${date}%`);
+        const screenshots = db.prepare('SELECT filename, file_size, captured_at, capture_type FROM screenshots WHERE captured_at LIKE ? ORDER BY captured_at DESC').all(`${date}%`);
+        const runningApps = db.prepare('SELECT * FROM running_apps ORDER BY is_foreground DESC, app_name ASC').all();
+
+        let totalSeconds = 0;
+        let studySeconds = 0;
+        let entertainmentSeconds = 0;
+
+        screenTime.forEach(row => {
+            totalSeconds += (row.seconds || 0);
+            const lower = (row.app_name || '').toLowerCase() + ' ' + (row.package_name || '').toLowerCase();
+            if (lower.includes('edu') || lower.includes('study') || lower.includes('book') || lower.includes('math') || lower.includes('kindle')) {
+                studySeconds += (row.seconds || 0);
+            } else if (lower.includes('game') || lower.includes('youtube') || lower.includes('insta') || lower.includes('netflix') || lower.includes('fb') || lower.includes('tiktok')) {
+                entertainmentSeconds += (row.seconds || 0);
+            }
+        });
+
+        res.json({
+            date,
+            summary: {
+                totalSeconds,
+                studySeconds,
+                entertainmentSeconds,
+                screenTimeCount: screenTime.length,
+                webVisitsCount: webActivity.length,
+                blockedAttemptsCount: blockedAttempts.length,
+                screenshotsCount: screenshots.length,
+                autoScreenshotsCount: screenshots.filter(s => s.capture_type === 'auto_random').length
+            },
+            screenTime,
+            webActivity,
+            blockedAttempts,
+            screenshots,
+            runningApps
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/reports/csv', requireAuth, (req, res) => {
+    try {
+        const date = req.query.date || getLocalDateString();
+        const screenTime = db.prepare('SELECT * FROM screen_time WHERE date = ? ORDER BY seconds DESC').all(date);
+        const webActivity = db.prepare('SELECT * FROM web_activity WHERE visited_at LIKE ? ORDER BY duration_seconds DESC').all(`${date}%`);
+        const blockedAttempts = db.prepare('SELECT * FROM blocked_attempts WHERE attempted_at LIKE ? ORDER BY attempted_at DESC').all(`${date}%`);
+
+        let csv = 'Category,App/Domain,Package/URL,Duration (Minutes),Timestamp/Details\n';
+        screenTime.forEach(s => {
+            const mins = Math.round((s.seconds || 0) / 60);
+            csv += `"Screen Time","${(s.app_name || '').replace(/"/g, '""')}","${s.package_name || ''}",${mins},"${s.date}"\n`;
+        });
+        webActivity.forEach(w => {
+            const mins = Math.round((w.duration_seconds || 0) / 60 * 10) / 10;
+            csv += `"Web Activity","${(w.domain || '').replace(/"/g, '""')}","${(w.url || '').replace(/"/g, '""')}",${mins},"${w.visited_at || ''}"\n`;
+        });
+        blockedAttempts.forEach(b => {
+            csv += `"Blocked Attempt","${(b.app_name || '').replace(/"/g, '""')}","${b.package_name || ''}",0,"Attempted at ${b.attempted_at || ''}"\n`;
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="BharatWatch_Daily_Report_${date}.csv"`);
+        res.send(csv);
+    } catch (e) {
+        res.status(500).send('Error generating CSV: ' + e.message);
+    }
+});
+
+// ═══════════════════════════════════════════
 //  WEBSOCKET UPGRADE HANDLER
 // ═══════════════════════════════════════════
 server.on('upgrade', (request, socket, head) => {
@@ -443,6 +604,18 @@ agentWss.on('connection', (ws) => {
     db.prepare('UPDATE device_status SET is_online = 1, last_seen = ?, updated_at = ? WHERE id = 1')
         .run(now, now);
     broadcastToDashboard({ type: 'agent_online' });
+
+    // Immediately push blocked apps sync to the newly connected agent
+    try {
+        const rules = db.prepare('SELECT * FROM blocked_apps').all();
+        ws.send(JSON.stringify({
+            type: 'command',
+            command: 'blocked_apps_sync',
+            rules: rules
+        }));
+    } catch (err) {
+        console.error('Error sending initial blocked apps sync:', err.message);
+    }
 
     ws.isAlive = true;
     ws.on('pong', () => { ws.isAlive = true; });
@@ -520,8 +693,9 @@ function handleAgentMessage(msg) {
             const buffer = Buffer.from(msg.data, 'base64');
             fs.writeFileSync(filePath, buffer);
 
-            db.prepare('INSERT INTO screenshots (filename, file_size, command_id, captured_at) VALUES (?, ?, ?, ?)')
-                .run(filename, buffer.length, msg.commandId ?? null, now);
+            const captureType = msg.captureType || 'manual';
+            db.prepare('INSERT INTO screenshots (filename, file_size, command_id, captured_at, capture_type) VALUES (?, ?, ?, ?, ?)')
+                .run(filename, buffer.length, msg.commandId ?? null, now, captureType);
 
             if (msg.commandId) {
                 db.prepare('UPDATE commands SET status = ?, completed_at = ? WHERE id = ?')
@@ -531,7 +705,8 @@ function handleAgentMessage(msg) {
                 type: 'screenshot_ready',
                 filename,
                 commandId: msg.commandId,
-                capturedAt: now
+                capturedAt: now,
+                captureType
             });
             break;
         }
@@ -580,7 +755,7 @@ function handleAgentMessage(msg) {
                 .run(msg.appName, msg.packageName, msg.eventType, msg.timestamp || now);
 
             // Upsert screen_time
-            const today = now.split('T')[0];
+            const today = msg.date || getLocalDateString();
             const cat = categorizeApp(msg.packageName);
             db.prepare(`INSERT INTO screen_time (date, app_name, package_name, total_seconds, category) 
                          VALUES (?, ?, ?, 0, ?) 
@@ -599,16 +774,25 @@ function handleAgentMessage(msg) {
         }
 
         case 'screen_time_update': {
-            const date = now.split('T')[0];
+            const date = msg.date || getLocalDateString();
             const upsert = db.prepare(`
                 INSERT INTO screen_time (date, app_name, package_name, total_seconds, category)
                 VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(date, package_name) DO UPDATE SET total_seconds = ?
+                ON CONFLICT(date, package_name) DO UPDATE SET total_seconds = MAX(screen_time.total_seconds, excluded.total_seconds)
             `);
             const tx = db.transaction((entries) => {
+                const packageTotals = new Map();
                 for (const e of entries) {
+                    if (!e || !e.package) continue;
+                    const sec = Number(e.seconds) || 0;
+                    const prev = packageTotals.get(e.package);
+                    if (!prev || sec > prev.seconds) {
+                        packageTotals.set(e.package, { name: e.name || e.package, package: e.package, seconds: sec });
+                    }
+                }
+                for (const e of packageTotals.values()) {
                     const cat = categorizeApp(e.package);
-                    upsert.run(date, e.name, e.package, e.seconds, cat, e.seconds);
+                    upsert.run(date, e.name, e.package, e.seconds, cat);
                 }
             });
             tx(msg.entries || []);
@@ -657,6 +841,25 @@ function handleAgentMessage(msg) {
                 duration,
                 category,
                 visitedAt
+            });
+            break;
+        }
+
+        case 'blocked_attempt': {
+            const pkg = msg.package || 'unknown';
+            const appName = msg.appName || pkg;
+            const reason = msg.reason || 'Blocked by Parental Controls';
+            const attemptedAt = msg.timestamp || now;
+
+            db.prepare('INSERT INTO blocked_attempts (package_name, app_name, reason, attempted_at) VALUES (?, ?, ?, ?)')
+                .run(pkg, appName, reason, attemptedAt);
+
+            broadcastToDashboard({
+                type: 'blocked_attempt_alert',
+                package: pkg,
+                appName: appName,
+                reason: reason,
+                attemptedAt: attemptedAt
             });
             break;
         }

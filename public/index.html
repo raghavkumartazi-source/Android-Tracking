@@ -64,6 +64,9 @@
             <button class="nav-item" data-page="web" onclick="switchPage('web')">
                 🌐<span class="tooltip">Web Activity</span>
             </button>
+            <button class="nav-item" data-page="controls" onclick="switchPage('controls')">
+                🛡️<span class="tooltip">Parental Controls</span>
+            </button>
         </div>
         <div class="sidebar-bottom">
             <button class="nav-item" onclick="handleLogout()" title="Logout">
@@ -94,6 +97,9 @@
         </button>
         <button class="nav-item" data-page="web" onclick="switchPage('web')">
             🌐<span class="nav-label">Web</span>
+        </button>
+        <button class="nav-item" data-page="controls" onclick="switchPage('controls')">
+            🛡️<span class="nav-label">Controls</span>
         </button>
     </nav>
 
@@ -218,6 +224,10 @@
                     <div class="icon">🔄</div>
                     <span>Refresh All</span>
                 </button>
+                <button class="action-btn" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);" onclick="openDailyReportModal()">
+                    <div class="icon">📑</div>
+                    <span>Export Daily Digest</span>
+                </button>
             </div>
 
             <!-- Recent Activity -->
@@ -253,12 +263,24 @@
 
         <!-- ═══════ SCREENSHOTS PAGE ═══════ -->
         <div id="screenshotsPage" class="page">
-            <div class="screenshots-header">
-                <h2 class="page-title">Screenshots</h2>
-                <button class="action-btn screenshot" onclick="takeScreenshot()">
-                    <div class="icon">📸</div>
-                    <span>Capture Now</span>
-                </button>
+            <div class="screenshots-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+                <div>
+                    <h2 class="page-title" style="margin:0;">Screenshots & Visual Timeline</h2>
+                    <p style="color:#94a3b8; font-size:0.875rem; margin:0.25rem 0 0 0;">⚡ Auto Random stealth screenshots every ~15 mins + Manual captures</p>
+                </div>
+                <div style="display:flex; gap:0.75rem; align-items:center;">
+                    <div style="background:rgba(255,255,255,0.06); padding:0.5rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:0.5rem;">
+                        <span style="font-size:0.85rem; color:#e2e8f0;">⚡ Auto Random:</span>
+                        <label class="switch" style="margin:0;">
+                            <input type="checkbox" id="autoScreenshotToggle" checked onchange="toggleAutoScreenshots(this.checked)">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <button class="action-btn screenshot" onclick="takeScreenshot()" style="margin:0;">
+                        <div class="icon">📸</div>
+                        <span>Capture Now</span>
+                    </button>
+                </div>
             </div>
             <div class="screenshots-grid" id="screenshotsGrid">
                 <div class="empty-state" style="grid-column: 1/-1">
@@ -313,7 +335,66 @@
 
         <!-- ═══════ SCREEN TIME PAGE ═══════ -->
         <div id="screentimePage" class="page">
-            <h2 class="page-title">Screen Time</h2>
+            <div class="screenshots-header" style="margin-bottom: 1.5rem;">
+                <div>
+                    <h2 class="page-title" style="margin-bottom: 0.2rem;">Screen Time & Focus Analysis</h2>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Inspect usage analytics, category breakdowns, and AI productivity scores</span>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <input type="date" id="screenTimeDatePicker" class="search-input" style="padding: 0.45rem 0.85rem; font-size: 0.85rem; border-radius: 8px; width: auto; background: var(--card-bg); color: var(--text); border: 1px solid var(--border);" onchange="loadScreenTimeForDate(this.value)" />
+                    <button class="action-btn refresh" onclick="loadScreenTime()">
+                        <div class="icon">🔄</div>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Detailed Focus Analysis Banner -->
+            <div class="card" id="screenTimeAnalysisCard" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary); background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
+                    <span class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🧠 Focus & Productivity Score</span>
+                    </span>
+                    <span id="focusScoreBadge" style="font-size: 0.8rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 20px; background: rgba(255,255,255,0.1); color: #fff;">Evaluating...</span>
+                </div>
+                <div style="padding: 1rem 0 0.5rem 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem;">
+                        <div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #fff; letter-spacing: -0.5px;" id="focusScoreValue">-- / 100</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);" id="focusScoreSummary">Analyzing daily activity distribution...</div>
+                        </div>
+                        <div style="text-align: right; font-size: 0.85rem; color: var(--text-muted);" id="focusTotalSummary">
+                            Total: --
+                        </div>
+                    </div>
+                    <!-- Multi-segment visual progress bar -->
+                    <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 1rem;" id="focusBarContainer">
+                        <div id="barStudy" style="width: 0%; background: #ffffff; transition: width 0.5s ease;" title="Study & Education"></div>
+                        <div id="barSocial" style="width: 0%; background: #bbbbbb; transition: width 0.5s ease;" title="Social & Communication"></div>
+                        <div id="barEntertainment" style="width: 0%; background: #666666; transition: width 0.5s ease;" title="Entertainment & Media"></div>
+                        <div id="barOther" style="width: 0%; background: #333333; transition: width 0.5s ease;" title="Other & Utilities"></div>
+                    </div>
+                    <!-- Detailed Insights Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;" id="focusInsightsGrid">
+                        <div style="background: rgba(255,255,255,0.02); padding: 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;">📚 Study & Productive</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #fff;" id="insightStudyTime">0m (0%)</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.02); padding: 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;">💬 Social Media</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #fff;" id="insightSocialTime">0m (0%)</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.02); padding: 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;">🎬 Entertainment</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #fff;" id="insightEntTime">0m (0%)</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.02); padding: 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;">🔥 Top Activity Insight</div>
+                            <div style="font-size: 0.9rem; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="insightTopActivity">No activity logged yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="screentime-grid">
                 <div class="card">
                     <div class="card-header">
@@ -443,6 +524,146 @@
             </div>
         </div>
 
+        <!-- ═══════════════════════════════════════ -->
+        <!--  PAGE: PARENTAL CONTROLS               -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="controlsPage" class="page">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <h2 class="page-title" style="margin-bottom:0.25rem;">👨‍👩‍👧 Parental Controls & Easy App Blocker</h2>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; margin:0;">Easily protect study hours, manage daily screen time, and lock distracting games or social media in one click.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openAddRuleModal()" style="font-weight:600; padding:0.75rem 1.4rem; display:flex; align-items:center; gap:0.5rem; border-radius:10px; font-size:0.95rem; box-shadow:0 4px 15px rgba(255,255,255,0.15);">
+                    <span>➕ Add Custom Rule</span>
+                </button>
+            </div>
+
+            <!-- Parent Quick Control Panel (One-Click Actions & Presets) -->
+            <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.15);">
+                <div style="margin-bottom:1.25rem;">
+                    <h3 class="card-title" style="margin-bottom:0.35rem; display:flex; align-items:center; gap:0.5rem; font-size:1.15rem;">⚡ One-Click Smart Parental Actions</h3>
+                    <p style="color:var(--text-secondary); font-size:0.85rem; margin:0;">Click any button below to immediately apply or remove safety rules without technical setup.</p>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+                    <button class="btn" onclick="applyParentPreset('bedtime')" style="background:rgba(155, 89, 182, 0.18); border:1px solid rgba(155, 89, 182, 0.4); color:#d2b4de; padding:1rem; border-radius:12px; text-align:left; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; gap:0.35rem;">
+                        <span style="font-size:1.1rem; font-weight:700; color:#fff;">🌙 Bedtime Study Lock</span>
+                        <span style="font-size:0.78rem; opacity:0.9;">Blocks Instagram, TikTok, YouTube & Games between <b>9:00 PM – 6:00 AM</b>.</span>
+                    </button>
+                    <button class="btn" onclick="applyParentPreset('lockall')" style="background:rgba(231, 76, 60, 0.18); border:1px solid rgba(231, 76, 60, 0.4); color:#fadbd8; padding:1rem; border-radius:12px; text-align:left; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; gap:0.35rem;">
+                        <span style="font-size:1.1rem; font-weight:700; color:#ff6b6b;">🔒 Instant Focus Lock</span>
+                        <span style="font-size:0.78rem; opacity:0.9;">Permanently locks all major social media and gaming apps immediately.</span>
+                    </button>
+                    <button class="btn" onclick="applyParentPreset('quota1hr')" style="background:rgba(52, 152, 219, 0.18); border:1px solid rgba(52, 152, 219, 0.4); color:#d4e6f1; padding:1rem; border-radius:12px; text-align:left; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; gap:0.35rem;">
+                        <span style="font-size:1.1rem; font-weight:700; color:#5bc0de;">⏳ 1-Hour Daily Limit</span>
+                        <span style="font-size:0.78rem; opacity:0.9;">Allows <b>60 minutes/day</b> on social media & videos, then locks automatically.</span>
+                    </button>
+                    <button class="btn" onclick="applyParentPreset('unlockall')" style="background:rgba(46, 213, 115, 0.15); border:1px solid rgba(46, 213, 115, 0.35); color:#a9dfbf; padding:1rem; border-radius:12px; text-align:left; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; gap:0.35rem;">
+                        <span style="font-size:1.1rem; font-weight:700; color:#2ed573;">🔓 Clear All Restrictions</span>
+                        <span style="font-size:0.78rem; opacity:0.9;">Removes active app blocks for weekends or holiday free access.</span>
+                    </button>
+                </div>
+
+                <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:1.25rem;">
+                    <h4 style="font-size:0.9rem; font-weight:600; color:var(--text-secondary); margin:0 0 0.75rem 0;">🎯 One-Click App Selector (Tap to restrict any popular app instantly):</h4>
+                    <div style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.instagram.android', 'Instagram')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">📸 Instagram</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.google.android.youtube', 'YouTube')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">📺 YouTube</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.zhiliaoapp.musically', 'TikTok')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">🎵 TikTok</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.snapchat.android', 'Snapchat')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">👻 Snapchat</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.whatsapp', 'WhatsApp')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">💬 WhatsApp</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.pubg.imobile', 'BGMI / PUBG')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">🎮 BGMI / PUBG</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.dts.freefireth', 'Free Fire')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">🔥 Free Fire</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.android.chrome', 'Chrome Browser')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">🌐 Chrome</button>
+                        <button class="btn btn-sm" onclick="openAddRuleModal('com.roblox.client', 'Roblox')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:20px; padding:0.4rem 0.9rem;">👾 Roblox</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total App List with One-Click Time Limit Setting -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                    <div>
+                        <h3 class="card-title" style="margin-bottom:0.25rem;">📱 Total App List & One-Click Time Limit Setter</h3>
+                        <div style="font-size:0.8rem; color:var(--text-secondary);">Easily set a daily screen limit or block any application installed/running on the child's phone with a single tap.</div>
+                    </div>
+                    <button class="btn btn-sm" onclick="loadTotalAppsList()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff;">🔄 Refresh App List</button>
+                </div>
+                <div style="display:flex; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap;">
+                    <input type="text" id="totalAppsSearchInput" placeholder="🔍 Search app name or package ID..." oninput="filterTotalAppsList()" style="flex:1; min-width:200px; background:#080808; border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:0.55rem 1rem; color:#fff; font-size:0.88rem;">
+                </div>
+                <div class="table-container" style="max-height: 480px; overflow-y: auto;">
+                    <table class="data-table">
+                        <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 2;">
+                            <tr>
+                                <th style="width: 25%;">App Name</th>
+                                <th style="width: 25%;">Package ID</th>
+                                <th style="width: 15%;">Current Limit / Status</th>
+                                <th style="width: 35%;">Quick Time Limit Setter</th>
+                            </tr>
+                        </thead>
+                        <tbody id="totalAppsTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Loading total app list from device...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Active Rules Section -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h3 class="card-title" style="margin-bottom:0;">🛡️ Active Restriction Rules</h3>
+                    <button class="btn btn-sm" onclick="loadBlockedApps()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff;">🔄 Refresh Rules</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>App Name</th>
+                                <th>Package Name</th>
+                                <th>Restriction Type</th>
+                                <th>Schedule / Quota Details</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blockedAppsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Loading restriction rules...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Interception Logs Section -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h3 class="card-title" style="margin-bottom:0;">🚨 Recent App Block Intercepts</h3>
+                    <button class="btn btn-sm" onclick="loadBlockedAttempts()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff;">🔄 Refresh Logs</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>App Name</th>
+                                <th>Package Name</th>
+                                <th>Reason Blocked</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blockedAttemptsTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Loading interception logs...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
 
@@ -513,6 +734,152 @@
 
 <!-- Toast container -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  ADD BLOCK RULE MODAL (PARENT FRIENDLY) -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="addRuleModal" onclick="closeAddRuleModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 520px; padding: 1.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+            <span class="modal-title" style="font-size: 1.3rem; font-weight:700; display:flex; align-items:center; gap:0.5rem;">👨‍👩‍👧 Add App Restriction</span>
+            <button class="modal-close" onclick="closeAddRuleModal()" style="background:none; border:none; color:var(--text-secondary); font-size:1.5rem; cursor:pointer;">✕</button>
+        </div>
+        <form id="addRuleForm" onsubmit="saveBlockRule(event)" style="display:flex; flex-direction:column; gap:1.15rem;">
+            
+            <!-- Step 1: Pick App from Dropdown or Presets -->
+            <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                <label style="display:block; font-size:0.9rem; font-weight:700; color:#fff; margin-bottom:0.45rem;">📱 1. Select App to Restrict <span style="color:#ff6b6b;">*</span></label>
+                <select id="ruleAppSelector" onchange="onAppSelectChange()" style="width:100%; padding:0.75rem; background:var(--bg-main); border:1px solid var(--border); border-radius:10px; color:#fff; font-size:0.95rem; font-weight:600; cursor:pointer;">
+                    <option value="">-- Choose App from Child's Phone --</option>
+                </select>
+                
+                <div style="margin-top:0.75rem; display:flex; align-items:center; justify-content:space-between;">
+                    <span style="font-size:0.78rem; color:var(--text-secondary);">Selected Package ID: <b id="displayPackageId" style="color:#aaa;">None</b></span>
+                    <button type="button" onclick="toggleCustomPackageInput()" style="background:none; border:none; color:#1e90ff; font-size:0.78rem; cursor:pointer; text-decoration:underline;">Enter Manual ID</button>
+                </div>
+
+                <div id="customPackageDiv" style="display:none; margin-top:0.75rem; border-top:1px dashed rgba(255,255,255,0.1); padding-top:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem;">Custom Package Name & Display Name</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" id="rulePackageInput" placeholder="com.example.app" style="flex:1; padding:0.5rem; background:var(--bg-main); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:0.85rem;">
+                        <input type="text" id="ruleAppNameInput" placeholder="App Name" style="flex:1; padding:0.5rem; background:var(--bg-main); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:0.85rem;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Choose Restriction Type -->
+            <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                <label style="display:block; font-size:0.9rem; font-weight:700; color:#fff; margin-bottom:0.45rem;">🛡️ 2. Choose Restriction Mode</label>
+                <select id="ruleTypeSelect" onchange="toggleRuleInputs()" style="width:100%; padding:0.75rem; background:var(--bg-main); border:1px solid var(--border); border-radius:10px; color:#fff; font-size:0.95rem; font-weight:600; cursor:pointer;">
+                    <option value="always">🛑 Always Block (Instant Permanent Lockout)</option>
+                    <option value="schedule">📅 Bedtime & Study Schedule (Block during specific hours)</option>
+                    <option value="quota">⏳ Daily Time Limit (Block after X minutes per day)</option>
+                </select>
+
+                <!-- Schedule Mode Inputs & Presets -->
+                <div id="scheduleInputs" style="display:none; flex-direction:column; gap:0.85rem; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.85rem;">
+                    <div>
+                        <span style="font-size:0.82rem; color:var(--text-secondary); font-weight:600;">⚡ Quick Study / Sleep Schedules:</span>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.4rem;">
+                            <button type="button" class="btn btn-sm" onclick="setQuickSchedule('21:00', '06:00')" style="background:rgba(155,89,182,0.2); border:1px solid rgba(155,89,182,0.4); color:#e8daef; border-radius:6px;">🌙 Bedtime (9 PM - 6 AM)</button>
+                            <button type="button" class="btn btn-sm" onclick="setQuickSchedule('16:00', '20:00')" style="background:rgba(52,152,219,0.2); border:1px solid rgba(52,152,219,0.4); color:#d4e6f1; border-radius:6px;">📚 Study Time (4 PM - 8 PM)</button>
+                            <button type="button" class="btn btn-sm" onclick="setQuickSchedule('08:00', '15:00')" style="background:rgba(241,196,15,0.2); border:1px solid rgba(241,196,15,0.4); color:#fef9e7; border-radius:6px;">🏫 School Hours (8 AM - 3 PM)</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:1rem;">
+                        <div style="flex:1;">
+                            <label style="display:block; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem;">Start Time (From)</label>
+                            <input type="time" id="ruleScheduleStart" style="width:100%; padding:0.65rem; background:var(--bg-main); border:1px solid var(--border); border-radius:8px; color:#fff; font-size:0.95rem;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="display:block; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem;">End Time (Until)</label>
+                            <input type="time" id="ruleScheduleEnd" style="width:100%; padding:0.65rem; background:var(--bg-main); border:1px solid var(--border); border-radius:8px; color:#fff; font-size:0.95rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quota Mode Inputs & Presets -->
+                <div id="quotaInputs" style="display:none; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.85rem;">
+                    <div>
+                        <span style="font-size:0.82rem; color:var(--text-secondary); font-weight:600;">⚡ Quick Time Limit Presets:</span>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.4rem; margin-bottom:0.75rem;">
+                            <button type="button" class="btn btn-sm" onclick="setQuickQuota(15)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); color:#fff; border-radius:6px;">15 Mins</button>
+                            <button type="button" class="btn btn-sm" onclick="setQuickQuota(30)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); color:#fff; border-radius:6px;">30 Mins</button>
+                            <button type="button" class="btn btn-sm" onclick="setQuickQuota(60)" style="background:rgba(52,152,219,0.25); border:1px solid rgba(52,152,219,0.5); color:#d4e6f1; border-radius:6px;">1 Hour (60 Mins)</button>
+                            <button type="button" class="btn btn-sm" onclick="setQuickQuota(120)" style="background:rgba(231,76,60,0.25); border:1px solid rgba(231,76,60,0.5); color:#fadbd8; border-radius:6px;">2 Hours (120 Mins)</button>
+                        </div>
+                    </div>
+                    <label style="display:block; font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem;">Daily Allowance (in minutes)</label>
+                    <input type="number" id="ruleQuotaMinutes" min="1" max="1440" placeholder="e.g. 60" style="width:100%; padding:0.65rem; background:var(--bg-main); border:1px solid var(--border); border-radius:8px; color:#fff; font-size:0.95rem; font-weight:600;">
+                </div>
+            </div>
+
+            <!-- Save & Cancel Buttons -->
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.25rem;">
+                <button type="button" class="btn" onclick="closeAddRuleModal()" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); color:#fff; padding:0.65rem 1.25rem; font-weight:600; border-radius:8px;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="padding:0.65rem 1.65rem; font-weight:700; border-radius:8px; font-size:0.95rem; box-shadow:0 4px 15px rgba(255,255,255,0.2);">🔒 Save Safety Rule</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════ DAILY DIGEST MODAL ═══════ -->
+<div id="dailyReportModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(6px);">
+    <div class="modal-content" style="background:#111827; border:1px solid #334155; border-radius:16px; width:90%; max-width:850px; max-height:85vh; overflow-y:auto; padding:2rem; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);">
+        <button onclick="closeDailyReportModal()" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; color:#94a3b8; font-size:1.75rem; cursor:pointer; line-height:1;">&times;</button>
+        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+            <div style="font-size:2.5rem;">📑</div>
+            <div>
+                <h2 style="margin:0; font-size:1.6rem; color:#f8fafc;">BharatWatch Daily Activity Digest</h2>
+                <p style="margin:0.25rem 0 0 0; color:#94a3b8; font-size:0.9rem;" id="dailyReportDateText">Generating productivity and safety summary...</p>
+            </div>
+        </div>
+
+        <!-- Summary Cards Grid -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:1rem; margin-bottom:1.5rem;" id="dailyReportStatsGrid">
+            <!-- Loaded dynamically -->
+        </div>
+
+        <!-- Focus Ratio Bar -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:1.25rem; margin-bottom:1.5rem;">
+            <h4 style="margin:0 0 0.75rem 0; color:#e2e8f0; font-size:1rem; display:flex; justify-content:space-between; align-items:center;">
+                <span>⚖️ Study vs Entertainment Productivity Ratio</span>
+                <span id="dailyProductivityScoreText" style="color:#10b981; font-weight:bold; font-size:1.1rem;">--</span>
+            </h4>
+            <div style="height:16px; width:100%; background:#334155; border-radius:8px; overflow:hidden; display:flex;" id="dailyProductivityBar">
+                <!-- Segments -->
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:0.6rem; font-size:0.85rem; color:#94a3b8; font-weight:500;">
+                <span id="dailyStudyTimeLabel" style="color:#60a5fa;">📚 Study: 0m</span>
+                <span id="dailyEntertainTimeLabel" style="color:#f87171;">🎮 Entertainment: 0m</span>
+                <span id="dailyTotalTimeLabel" style="color:#e2e8f0;">⏱️ Total: 0m</span>
+            </div>
+        </div>
+
+        <!-- Top Activity Tables Section -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem; margin-bottom:1.5rem;">
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:1rem;">
+                <h5 style="margin:0 0 0.75rem 0; color:#e2e8f0; font-size:0.95rem; display:flex; align-items:center; gap:0.5rem;">📱 Top Screen Time Apps</h5>
+                <div id="dailyTopAppsList" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem;"></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:1rem;">
+                <h5 style="margin:0 0 0.75rem 0; color:#e2e8f0; font-size:0.95rem; display:flex; align-items:center; gap:0.5rem;">🌐 Web Visits & Intercepts</h5>
+                <div id="dailyWebAndBlockList" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem;"></div>
+            </div>
+        </div>
+
+        <!-- Export Actions -->
+        <div style="display:flex; gap:1rem; justify-content:flex-end; border-top:1px solid rgba(255,255,255,0.1); padding-top:1.5rem; flex-wrap:wrap;">
+            <button onclick="closeDailyReportModal()" class="btn-secondary" style="padding:0.75rem 1.5rem; border-radius:8px; background:#334155; color:#fff; border:none; cursor:pointer;">Close</button>
+            <button onclick="window.print()" class="btn-secondary" style="padding:0.75rem 1.5rem; border-radius:8px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:0.5rem;">
+                <span>🖨️ Print / Save PDF</span>
+            </button>
+            <button onclick="downloadDailyCSV()" class="btn-primary" style="padding:0.75rem 1.5rem; border-radius:8px; background:linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border:none; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:0.5rem;">
+                <span>⬇️ Download CSV Spreadsheet</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 <script src="app.js"></script>
 </body>

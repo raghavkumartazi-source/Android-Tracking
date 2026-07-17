@@ -236,6 +236,13 @@ function handleWSMessage(msg) {
         case 'device_unlocked':
             showToast('Device unlocked', 'info');
             break;
+        case 'blocked_apps_sync':
+            loadBlockedApps();
+            break;
+        case 'blocked_attempt_alert':
+            showToast(`🛑 Intercept Alert: ${msg.appName || msg.package} was blocked (${msg.reason})`, 'error');
+            loadBlockedAttempts();
+            break;
         case 'command_result':
             if (msg.success) {
                 showToast(msg.result || 'Command executed', 'success');
@@ -353,7 +360,8 @@ function switchPage(page) {
         screentime: 'Screen Time',
         apps: 'Running Apps',
         web: 'Web Activity',
-        camera: 'Camera Photos'
+        camera: 'Camera Photos',
+        controls: 'Parental Controls & App Blocker'
     };
     document.getElementById('headerTitle').textContent = titles[page] || page;
 
@@ -364,6 +372,11 @@ function switchPage(page) {
     if (page === 'screentime') loadScreenTime();
     if (page === 'apps') loadApps();
     if (page === 'web') loadWebActivity();
+    if (page === 'controls') {
+        loadTotalAppsList();
+        loadBlockedApps();
+        loadBlockedAttempts();
+    }
 }
 
 // ═══════════════════════════════════════════
@@ -471,8 +484,11 @@ function renderScreenshots(screenshots) {
 
     grid.innerHTML = screenshots.map(s => `
         <div class="card screenshot-card" onclick="openScreenshot('${s.filename}', '${formatTime(s.captured_at)}')">
-            <div class="screenshot-thumb">
+            <div class="screenshot-thumb" style="position:relative;">
                 <img src="/api/screenshots/file/${s.filename}?token=${authToken}" alt="Screenshot" loading="lazy">
+                <div style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.78); padding:3px 8px; border-radius:6px; font-size:0.75rem; color:${s.capture_type === 'auto_random' ? '#60a5fa' : '#f87171'}; border:1px solid rgba(255,255,255,0.15); backdrop-filter:blur(4px); font-weight:600;">
+                    ${s.capture_type === 'auto_random' ? '⚡ Auto Random' : '🔴 Manual'}
+                </div>
             </div>
             <div class="screenshot-meta" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                 <div style="overflow:hidden;">
@@ -501,8 +517,11 @@ function renderRecentScreenshots(screenshots) {
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
             ${screenshots.map(s => `
                 <div class="screenshot-card card" style="padding:0;cursor:pointer" onclick="openScreenshot('${s.filename}', '${formatTime(s.captured_at)}')">
-                    <div class="screenshot-thumb" style="aspect-ratio:16/10">
+                    <div class="screenshot-thumb" style="aspect-ratio:16/10; position:relative;">
                         <img src="/api/screenshots/file/${s.filename}?token=${authToken}" alt="Screenshot" loading="lazy" style="width:100%;height:100%;object-fit:cover">
+                        <div style="position:absolute; top:4px; left:4px; background:rgba(0,0,0,0.78); padding:2px 6px; border-radius:4px; font-size:0.65rem; color:${s.capture_type === 'auto_random' ? '#60a5fa' : '#f87171'}; border:1px solid rgba(255,255,255,0.15); backdrop-filter:blur(4px); font-weight:600;">
+                            ${s.capture_type === 'auto_random' ? '⚡ Auto' : '🔴 Manual'}
+                        </div>
                     </div>
                     <div style="padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
                         <span class="screenshot-time" style="font-size:0.6875rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${formatTime(s.captured_at)}</span>
@@ -700,25 +719,36 @@ function addLiveActivity(msg) {
 // ═══════════════════════════════════════════
 //  LOAD SCREEN TIME
 // ═══════════════════════════════════════════
-async function loadScreenTime() {
+async function loadScreenTime(customDate = null) {
     try {
-        const data = await apiFetch('/api/screentime');
-        renderWeeklyChart(data.daily);
-        renderCategoryChart(data.categories);
-        renderCategoryList(data.categories);
-        renderTopApps(data.apps);
+        const url = customDate ? `/api/screentime?date=${customDate}` : '/api/screentime';
+        const data = await apiFetch(url);
+        renderWeeklyChart(data.daily || []);
+        renderCategoryChart(data.categories || []);
+        renderCategoryList(data.categories || []);
+        renderTopApps(data.apps || []);
+        renderDetailedAnalysis(data);
 
-        // Update stat
-        const todayTotal = data.daily.find(d => d.date === new Date().toISOString().split('T')[0]);
-        if (todayTotal) {
-            document.getElementById('statScreenTime').textContent = formatDuration(todayTotal.total_seconds);
+        // Update stat on Overview card
+        const localDate = customDate || new Date().toLocaleDateString('en-CA');
+        const todayRow = (data.daily || []).find(d => d.date === localDate);
+        const appsSum = (data.apps || []).reduce((sum, a) => sum + (a.total_seconds || 0), 0);
+        const totalSeconds = todayRow ? Math.max(todayRow.total_seconds || 0, appsSum) : appsSum;
 
-            const studyTime = data.categories.find(c => c.category === 'study');
-            if (studyTime) {
-                document.getElementById('statScreenTimeSub').textContent = `Study: ${formatDuration(studyTime.total_seconds)}`;
-            }
+        const statElem = document.getElementById('statScreenTime');
+        if (statElem) {
+            statElem.textContent = formatDuration(totalSeconds);
         }
-    } catch {}
+
+        const studyElem = document.getElementById('statScreenTimeSub');
+        if (studyElem) {
+            const studyTime = (data.categories || []).find(c => c.category === 'study');
+            const studySec = studyTime ? studyTime.total_seconds : 0;
+            studyElem.textContent = `Study: ${formatDuration(studySec)} • Resets daily at midnight`;
+        }
+    } catch (e) {
+        console.error('Failed to load screen time:', e);
+    }
 }
 
 function renderWeeklyChart(daily) {
@@ -887,6 +917,112 @@ function renderTopApps(apps) {
     `).join('');
 }
 
+function loadScreenTimeForDate(dateStr) {
+    if (dateStr) {
+        loadScreenTime(dateStr);
+    }
+}
+
+function renderDetailedAnalysis(data) {
+    const apps = data.apps || [];
+    const categories = data.categories || [];
+    const totalSec = apps.reduce((sum, a) => sum + (a.total_seconds || 0), 0);
+
+    const getCatSec = (name) => {
+        const row = categories.find(c => (c.category || '').toLowerCase() === name.toLowerCase());
+        return row ? (row.total_seconds || 0) : 0;
+    };
+
+    const studySec = getCatSec('study');
+    const socialSec = getCatSec('social');
+    const entSec = getCatSec('entertainment');
+    const otherSec = Math.max(0, totalSec - (studySec + socialSec + entSec));
+
+    const studyPct = totalSec > 0 ? (studySec / totalSec) * 100 : 0;
+    const socialPct = totalSec > 0 ? (socialSec / totalSec) * 100 : 0;
+    const entPct = totalSec > 0 ? (entSec / totalSec) * 100 : 0;
+    const otherPct = totalSec > 0 ? Math.max(0, 100 - (studyPct + socialPct + entPct)) : 0;
+
+    // Focus Score calculation (Study carries positive weight, social/ent carry negative friction, other neutral)
+    let score = 50;
+    if (totalSec > 0) {
+        const productiveRatio = (studySec + (otherSec * 0.4)) / totalSec;
+        const distractionRatio = (socialSec + entSec) / totalSec;
+        score = Math.round(Math.min(100, Math.max(0, (productiveRatio * 85) + ((1 - distractionRatio) * 15))));
+    } else {
+        score = 100; // Fresh day reset
+    }
+
+    const valEl = document.getElementById('focusScoreValue');
+    const badgeEl = document.getElementById('focusScoreBadge');
+    const summaryEl = document.getElementById('focusScoreSummary');
+    const totalEl = document.getElementById('focusTotalSummary');
+
+    if (valEl) valEl.textContent = `${totalSec > 0 ? score : '--'} / 100`;
+    if (totalEl) totalEl.textContent = `Total Today: ${formatDuration(totalSec)}`;
+
+    if (badgeEl) {
+        if (totalSec === 0) {
+            badgeEl.textContent = 'Day Reset • No Activity Yet';
+            badgeEl.style.background = 'rgba(255,255,255,0.1)';
+        } else if (score >= 75) {
+            badgeEl.textContent = '🌟 Highly Focused';
+            badgeEl.style.background = 'rgba(46, 213, 115, 0.2)';
+            badgeEl.style.color = '#2ed573';
+        } else if (score >= 50) {
+            badgeEl.textContent = '⚖️ Balanced Day';
+            badgeEl.style.background = 'rgba(30, 144, 255, 0.2)';
+            badgeEl.style.color = '#1e90ff';
+        } else {
+            badgeEl.textContent = '📱 Leisure Intensive';
+            badgeEl.style.background = 'rgba(255, 71, 87, 0.2)';
+            badgeEl.style.color = '#ff4757';
+        }
+    }
+
+    if (summaryEl) {
+        if (totalSec === 0) {
+            summaryEl.textContent = 'Counters reset daily at midnight. Activity will analyze as you use apps.';
+        } else if (studySec > entSec && studySec > socialSec) {
+            summaryEl.textContent = `Study time (${formatDuration(studySec)}) leads your daily activity! Great productivity momentum.`;
+        } else if (socialSec + entSec > studySec * 2) {
+            summaryEl.textContent = `Social & Media account for ${Math.round(socialPct + entPct)}% of today's screen time.`;
+        } else {
+            summaryEl.textContent = `Activity is distributed across ${apps.length} tracked apps today.`;
+        }
+    }
+
+    const barStudy = document.getElementById('barStudy');
+    const barSocial = document.getElementById('barSocial');
+    const barEnt = document.getElementById('barEntertainment');
+    const barOther = document.getElementById('barOther');
+
+    if (barStudy) barStudy.style.width = `${studyPct}%`;
+    if (barSocial) barSocial.style.width = `${socialPct}%`;
+    if (barEnt) barEnt.style.width = `${entPct}%`;
+    if (barOther) barOther.style.width = `${otherPct}%`;
+
+    const iStudy = document.getElementById('insightStudyTime');
+    const iSocial = document.getElementById('insightSocialTime');
+    const iEnt = document.getElementById('insightEntTime');
+    const iTop = document.getElementById('insightTopActivity');
+
+    if (iStudy) iStudy.textContent = `${formatDuration(studySec)} (${Math.round(studyPct)}%)`;
+    if (iSocial) iSocial.textContent = `${formatDuration(socialSec)} (${Math.round(socialPct)}%)`;
+    if (iEnt) iEnt.textContent = `${formatDuration(entSec)} (${Math.round(entPct)}%)`;
+
+    if (iTop) {
+        if (apps.length > 0) {
+            const top = apps[0];
+            const topPct = totalSec > 0 ? Math.round((top.total_seconds / totalSec) * 100) : 0;
+            iTop.textContent = `${top.app_name} (${formatDuration(top.total_seconds)} — ${topPct}% of day)`;
+            iTop.title = `${top.app_name} is your most active app today`;
+        } else {
+            iTop.textContent = 'No app usage recorded today yet';
+        }
+    }
+}
+
 // ═══════════════════════════════════════════
 //  LOAD RUNNING APPS
 // ═══════════════════════════════════════════
@@ -936,7 +1072,10 @@ function renderApps(apps) {
                     <div class="app-card-name">${escapeHtml(a.app_name)}</div>
                     <div class="app-card-package">${escapeHtml(a.package_name || '')}</div>
                 </div>
-                <span class="app-card-badge ${a.is_foreground ? 'fg' : 'bg'}">${a.is_foreground ? 'FG' : 'BG'}</span>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span class="app-card-badge ${a.is_foreground ? 'fg' : 'bg'}">${a.is_foreground ? 'FG' : 'BG'}</span>
+                    <button class="btn btn-sm" onclick="openAddRuleModal('${escapeHtml(a.package_name || '')}', '${escapeHtml(a.app_name || '')}')" style="background:rgba(255,107,107,0.15); color:#ff6b6b; border:1px solid rgba(255,107,107,0.3); padding:0.2rem 0.5rem; font-size:0.72rem; border-radius:6px; cursor:pointer;" title="Restrict this app">🛑 Block</button>
+                </div>
             </div>`;
     }).join('');
 }
@@ -1308,4 +1447,686 @@ function exportHistoryCsv() {
     window.location.href = `/api/web-activity/export?token=${authToken}`;
     showToast('Exporting full browser history CSV...', 'info');
 }
+
+// ═══════════════════════════════════════════
+//  PARENTAL CONTROLS & ACTIVE APP BLOCKER (PARENT-FRIENDLY)
+// ═══════════════════════════════════════════
+
+const PRESET_APPS_LIST = [
+    { pkg: 'com.instagram.android', name: '📸 Instagram' },
+    { pkg: 'com.google.android.youtube', name: '📺 YouTube' },
+    { pkg: 'com.zhiliaoapp.musically', name: '🎵 TikTok' },
+    { pkg: 'com.snapchat.android', name: '👻 Snapchat' },
+    { pkg: 'com.whatsapp', name: '💬 WhatsApp' },
+    { pkg: 'com.pubg.imobile', name: '🎮 BGMI / PUBG' },
+    { pkg: 'com.dts.freefireth', name: '🔥 Free Fire' },
+    { pkg: 'com.android.chrome', name: '🌐 Chrome Browser' },
+    { pkg: 'com.roblox.client', name: '👾 Roblox' },
+    { pkg: 'com.mojang.minecraftpe', name: '🕹️ Minecraft' },
+    { pkg: 'com.facebook.katana', name: '📘 Facebook' },
+    { pkg: 'com.twitter.android', name: '🐦 X / Twitter' },
+    { pkg: 'com.discord', name: '💬 Discord' }
+];
+
+async function populateParentAppSelector(selectedPkg = '') {
+    const selector = document.getElementById('ruleAppSelector');
+    if (!selector) return;
+
+    let html = `<option value="">-- Choose App from Child's Phone --</option>`;
+    html += `<optgroup label="🔥 Popular Presets (Instant Select)">`;
+    PRESET_APPS_LIST.forEach(a => {
+        html += `<option value="${a.pkg}" data-name="${a.name.replace(/^[^\s]+\s+/, '')}">${a.name}</option>`;
+    });
+    html += `</optgroup>`;
+
+    // Try fetching device apps / screen time apps dynamically
+    try {
+        const apps = await apiFetch('/api/apps');
+        if (apps && apps.length > 0) {
+            html += `<optgroup label="📱 Active / Tracked on Child's Phone">`;
+            apps.forEach(a => {
+                if (a.package_name && !PRESET_APPS_LIST.some(p => p.pkg === a.package_name)) {
+                    html += `<option value="${a.package_name}" data-name="${escapeHtml(a.app_name || a.package_name)}">📱 ${escapeHtml(a.app_name || a.package_name)}</option>`;
+                }
+            });
+            html += `</optgroup>`;
+        }
+    } catch (e) {}
+
+    html += `<option value="custom">⚙️ Custom Package Name (Manual ID Entry)...</option>`;
+    selector.innerHTML = html;
+
+    if (selectedPkg) {
+        if (selector.querySelector(`option[value="${selectedPkg}"]`)) {
+            selector.value = selectedPkg;
+            onAppSelectChange();
+        } else {
+            selector.value = 'custom';
+            toggleCustomPackageInput(true);
+            document.getElementById('rulePackageInput').value = selectedPkg;
+        }
+    } else {
+        onAppSelectChange();
+    }
+}
+
+function onAppSelectChange() {
+    const selector = document.getElementById('ruleAppSelector');
+    const displayPkg = document.getElementById('displayPackageId');
+    const customDiv = document.getElementById('customPackageDiv');
+    const pkgInput = document.getElementById('rulePackageInput');
+    const nameInput = document.getElementById('ruleAppNameInput');
+    if (!selector) return;
+
+    const val = selector.value;
+    if (val === 'custom') {
+        if (displayPkg) displayPkg.textContent = 'Custom Manual Entry';
+        if (customDiv) customDiv.style.display = 'block';
+    } else if (val) {
+        if (displayPkg) displayPkg.textContent = val;
+        if (customDiv) customDiv.style.display = 'none';
+        const opt = selector.options[selector.selectedIndex];
+        const appName = opt ? (opt.getAttribute('data-name') || opt.text.replace(/^[^\s]+\s+/, '')) : val;
+        if (pkgInput) pkgInput.value = val;
+        if (nameInput) nameInput.value = appName;
+    } else {
+        if (displayPkg) displayPkg.textContent = 'None';
+        if (customDiv) customDiv.style.display = 'none';
+        if (pkgInput) pkgInput.value = '';
+        if (nameInput) nameInput.value = '';
+    }
+}
+
+function toggleCustomPackageInput(forceShow = null) {
+    const customDiv = document.getElementById('customPackageDiv');
+    const selector = document.getElementById('ruleAppSelector');
+    if (!customDiv) return;
+    const isShown = forceShow !== null ? forceShow : (customDiv.style.display === 'none');
+    customDiv.style.display = isShown ? 'block' : 'none';
+    if (isShown && selector) selector.value = 'custom';
+}
+
+function setQuickSchedule(start, end) {
+    const sEl = document.getElementById('ruleScheduleStart');
+    const eEl = document.getElementById('ruleScheduleEnd');
+    if (sEl) sEl.value = start;
+    if (eEl) eEl.value = end;
+    showToast(`⏰ Study schedule set: ${start} to ${end}`, 'info');
+}
+
+function setQuickQuota(mins) {
+    const qEl = document.getElementById('ruleQuotaMinutes');
+    if (qEl) qEl.value = mins;
+    showToast(`⏳ Daily limit set to ${mins} minutes (${Math.round(mins/60 * 10)/10} hrs)`, 'info');
+}
+
+async function applyParentPreset(presetType) {
+    if (presetType === 'bedtime') {
+        if (!confirm('Apply Bedtime Study Lock (9:00 PM – 6:00 AM) to Instagram, YouTube, TikTok, Snapchat & Games?')) return;
+        const targetPkgs = [
+            { pkg: 'com.instagram.android', name: 'Instagram' },
+            { pkg: 'com.zhiliaoapp.musically', name: 'TikTok' },
+            { pkg: 'com.google.android.youtube', name: 'YouTube' },
+            { pkg: 'com.pubg.imobile', name: 'BGMI / PUBG' },
+            { pkg: 'com.dts.freefireth', name: 'Free Fire' }
+        ];
+        let saved = 0;
+        for (const item of targetPkgs) {
+            try {
+                await apiFetch('/api/blocked-apps', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        package_name: item.pkg,
+                        app_name: item.name,
+                        is_blocked: true,
+                        schedule_start: '21:00',
+                        schedule_end: '06:00',
+                        daily_quota_minutes: 0
+                    })
+                });
+                saved++;
+            } catch (e) {}
+        }
+        showToast(`🌙 Bedtime Study Lock activated across ${saved} social/gaming apps!`, 'success');
+        loadBlockedApps();
+    } else if (presetType === 'lockall') {
+        if (!confirm('Immediately lock all major social media and gaming apps right now?')) return;
+        const targetPkgs = [
+            { pkg: 'com.instagram.android', name: 'Instagram' },
+            { pkg: 'com.zhiliaoapp.musically', name: 'TikTok' },
+            { pkg: 'com.google.android.youtube', name: 'YouTube' },
+            { pkg: 'com.snapchat.android', name: 'Snapchat' },
+            { pkg: 'com.pubg.imobile', name: 'BGMI / PUBG' },
+            { pkg: 'com.dts.freefireth', name: 'Free Fire' }
+        ];
+        let saved = 0;
+        for (const item of targetPkgs) {
+            try {
+                await apiFetch('/api/blocked-apps', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        package_name: item.pkg,
+                        app_name: item.name,
+                        is_blocked: true,
+                        schedule_start: null,
+                        schedule_end: null,
+                        daily_quota_minutes: 0
+                    })
+                });
+                saved++;
+            } catch (e) {}
+        }
+        showToast(`🔒 Instant Focus Lock activated across ${saved} apps!`, 'success');
+        loadBlockedApps();
+    } else if (presetType === 'quota1hr') {
+        if (!confirm('Set a 1-Hour (60 min) Daily Screen Limit across top social media & gaming apps?')) return;
+        const targetPkgs = [
+            { pkg: 'com.instagram.android', name: 'Instagram' },
+            { pkg: 'com.zhiliaoapp.musically', name: 'TikTok' },
+            { pkg: 'com.google.android.youtube', name: 'YouTube' },
+            { pkg: 'com.pubg.imobile', name: 'BGMI / PUBG' },
+            { pkg: 'com.dts.freefireth', name: 'Free Fire' }
+        ];
+        let saved = 0;
+        for (const item of targetPkgs) {
+            try {
+                await apiFetch('/api/blocked-apps', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        package_name: item.pkg,
+                        app_name: item.name,
+                        is_blocked: true,
+                        schedule_start: null,
+                        schedule_end: null,
+                        daily_quota_minutes: 60
+                    })
+                });
+                saved++;
+            } catch (e) {}
+        }
+        showToast(`⏳ 1-Hour Daily Limit applied across ${saved} apps!`, 'success');
+        loadBlockedApps();
+    } else if (presetType === 'unlockall') {
+        if (!confirm('Are you sure you want to remove ALL restrictions for weekend / holiday free access?')) return;
+        try {
+            const current = await apiFetch('/api/blocked-apps');
+            if (current && current.length > 0) {
+                for (const app of current) {
+                    await apiFetch(`/api/blocked-apps/${encodeURIComponent(app.package_name)}`, { method: 'DELETE' });
+                }
+            }
+            showToast('🔓 All active restrictions cleared successfully!', 'success');
+            loadBlockedApps();
+        } catch (e) {
+            showToast('Failed to clear some restrictions', 'error');
+        }
+    }
+}
+
+function openAddRuleModal(packageName = '', appName = '') {
+    const modal = document.getElementById('addRuleModal');
+    if (!modal) return;
+    document.getElementById('ruleTypeSelect').value = 'always';
+    toggleRuleInputs();
+    populateParentAppSelector(packageName);
+    if (appName && document.getElementById('ruleAppNameInput')) {
+        document.getElementById('ruleAppNameInput').value = appName;
+    }
+    modal.classList.add('active');
+}
+
+function closeAddRuleModal(event) {
+    if (event && event.target !== event.currentTarget && !event.target.classList.contains('modal-close')) return;
+    const modal = document.getElementById('addRuleModal');
+    if (modal) modal.classList.remove('active');
+}
+
+function toggleRuleInputs() {
+    const type = document.getElementById('ruleTypeSelect').value;
+    const scheduleDiv = document.getElementById('scheduleInputs');
+    const quotaDiv = document.getElementById('quotaInputs');
+    if (scheduleDiv) scheduleDiv.style.display = type === 'schedule' ? 'flex' : 'none';
+    if (quotaDiv) quotaDiv.style.display = type === 'quota' ? 'block' : 'none';
+}
+
+async function saveBlockRule(event) {
+    event.preventDefault();
+    let pkg = document.getElementById('rulePackageInput').value.trim();
+    let name = document.getElementById('ruleAppNameInput').value.trim();
+    const selector = document.getElementById('ruleAppSelector');
+    if (selector && selector.value && selector.value !== 'custom') {
+        pkg = selector.value;
+        const opt = selector.options[selector.selectedIndex];
+        name = opt ? (opt.getAttribute('data-name') || opt.text.replace(/^[^\s]+\s+/, '')) : pkg;
+    }
+    if (!pkg) {
+        showToast('Please select an app to restrict or enter a valid package ID', 'error');
+        return;
+    }
+    const type = document.getElementById('ruleTypeSelect').value;
+
+    let scheduleStart = null;
+    let scheduleEnd = null;
+    let quotaMinutes = 0;
+
+    if (type === 'schedule') {
+        scheduleStart = document.getElementById('ruleScheduleStart').value;
+        scheduleEnd = document.getElementById('ruleScheduleEnd').value;
+        if (!scheduleStart || !scheduleEnd) {
+            showToast('Please specify both start and end times for the study schedule', 'error');
+            return;
+        }
+    } else if (type === 'quota') {
+        quotaMinutes = parseInt(document.getElementById('ruleQuotaMinutes').value, 10) || 0;
+        if (quotaMinutes <= 0) {
+            showToast('Please enter a valid daily usage quota in minutes', 'error');
+            return;
+        }
+    }
+
+    try {
+        const res = await apiFetch('/api/blocked-apps', {
+            method: 'POST',
+            body: JSON.stringify({
+                package_name: pkg,
+                app_name: name,
+                is_blocked: true,
+                schedule_start: scheduleStart,
+                schedule_end: scheduleEnd,
+                daily_quota_minutes: quotaMinutes
+            })
+        });
+        if (res && res.success) {
+            showToast(`Rule saved for ${name}! Pushed to device offline cache.`, 'success');
+            closeAddRuleModal();
+            loadBlockedApps();
+        } else {
+            showToast(res.error || 'Failed to save rule', 'error');
+        }
+    } catch (e) {
+        showToast('Error saving block rule', 'error');
+    }
+}
+
+async function deleteBlockRule(packageName) {
+    if (!confirm(`Are you sure you want to remove all restrictions for ${packageName}?`)) return;
+    try {
+        const res = await apiFetch(`/api/blocked-apps/${encodeURIComponent(packageName)}`, { method: 'DELETE' });
+        if (res && res.success) {
+            showToast('Rule deleted successfully', 'success');
+            loadBlockedApps();
+        } else {
+            showToast(res.error || 'Failed to delete rule', 'error');
+        }
+    } catch (e) {
+        showToast('Error deleting rule', 'error');
+    }
+}
+
+async function toggleBlockRule(packageName, currentBlocked, appName, scheduleStart, scheduleEnd, quotaMinutes) {
+    try {
+        const res = await apiFetch('/api/blocked-apps', {
+            method: 'POST',
+            body: JSON.stringify({
+                package_name: packageName,
+                app_name: appName,
+                is_blocked: !currentBlocked,
+                schedule_start: scheduleStart || null,
+                schedule_end: scheduleEnd || null,
+                daily_quota_minutes: quotaMinutes || 0
+            })
+        });
+        if (res && res.success) {
+            showToast(`Updated restriction status for ${appName}`, 'success');
+            loadBlockedApps();
+        } else {
+            showToast(res.error || 'Failed to toggle rule', 'error');
+        }
+    } catch (e) {
+        showToast('Error toggling block rule', 'error');
+    }
+}
+
+async function loadBlockedApps() {
+    const tbody = document.getElementById('blockedAppsTableBody');
+    if (!tbody) return;
+    try {
+        const rules = await apiFetch('/api/blocked-apps');
+        if (!rules || !rules.length) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2.5rem; color: var(--text-secondary);">No restriction rules active. Click "➕ Add New Block Rule" to configure parental controls.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = rules.map(r => {
+            const isBlocked = r.is_blocked === 1 || r.is_blocked === true;
+            let typeBadge = `<span style="background:rgba(255,107,107,0.15); color:#ff6b6b; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:600;">🛑 Always Block</span>`;
+            let details = 'Instant lockout 24/7';
+
+            if (r.schedule_start && r.schedule_end) {
+                typeBadge = `<span style="background:rgba(245,158,11,0.15); color:#f59e0b; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:600;">📅 Study Schedule</span>`;
+                details = `Blocked from <b>${escapeHtml(r.schedule_start)}</b> to <b>${escapeHtml(r.schedule_end)}</b>`;
+            } else if (r.daily_quota_minutes > 0) {
+                typeBadge = `<span style="background:rgba(59,130,246,0.15); color:#60a5fa; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:600;">⏳ Daily Quota</span>`;
+                details = `Block after <b>${r.daily_quota_minutes} minutes</b> / day`;
+            }
+
+            const statusHtml = isBlocked
+                ? `<span style="color:#10b981; font-weight:600; display:flex; align-items:center; gap:0.35rem;">🟢 Active</span>`
+                : `<span style="color:#6b7280; font-weight:600; display:flex; align-items:center; gap:0.35rem;">⚪ Paused</span>`;
+
+            return `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 0.85rem 0.75rem; font-weight:600; color:#fff;">${escapeHtml(r.app_name)}</td>
+                    <td style="padding: 0.85rem 0.75rem; color:var(--text-secondary); font-family:monospace; font-size:0.85rem;">${escapeHtml(r.package_name)}</td>
+                    <td style="padding: 0.85rem 0.75rem;">${typeBadge}</td>
+                    <td style="padding: 0.85rem 0.75rem; color:#e5e7eb; font-size:0.9rem;">${details}</td>
+                    <td style="padding: 0.85rem 0.75rem;">${statusHtml}</td>
+                    <td style="padding: 0.85rem 0.75rem;">
+                        <div style="display:flex; gap:0.5rem;">
+                            <button class="btn btn-sm" onclick="toggleBlockRule('${escapeHtml(r.package_name)}', ${isBlocked}, '${escapeHtml(r.app_name)}', '${escapeHtml(r.schedule_start || '')}', '${escapeHtml(r.schedule_end || '')}', ${r.daily_quota_minutes || 0})" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); color:#fff; padding:0.3rem 0.65rem;" title="${isBlocked ? 'Pause restriction' : 'Resume restriction'}">${isBlocked ? '⏸️ Pause' : '▶️ Resume'}</button>
+                            <button class="btn btn-sm" onclick="deleteBlockRule('${escapeHtml(r.package_name)}')" style="background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#ff6b6b; padding:0.3rem 0.65rem;" title="Delete rule">🗑️ Delete</button>
+                        </div>
+                    </td>
+                </tr>`;
+        }).join('');
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #ff6b6b;">Error loading restriction rules: ${e.message}</td></tr>`;
+    }
+}
+
+let cachedTotalAppsList = [];
+async function loadTotalAppsList() {
+    const tbody = document.getElementById('totalAppsTableBody');
+    if (!tbody) return;
+    try {
+        const [apps, rules] = await Promise.all([
+            apiFetch('/api/apps'),
+            apiFetch('/api/blocked-apps')
+        ]);
+
+        const rulesMap = {};
+        if (rules && Array.isArray(rules)) {
+            rules.forEach(r => {
+                rulesMap[r.package_name] = r;
+            });
+        }
+
+        const appMap = new Map();
+        // First add popular presets so parents see them right away even if device hasn't reported yet
+        PRESET_APPS_LIST.forEach(p => {
+            appMap.set(p.pkg, { package_name: p.pkg, app_name: p.name.replace(/^[^\s]+\s+/, '') });
+        });
+
+        // Add dynamically reported running/tracked apps from device
+        if (apps && Array.isArray(apps)) {
+            apps.forEach(a => {
+                if (a.package_name && !a.package_name.startsWith('com.android.systemui') && !a.package_name.startsWith('android')) {
+                    appMap.set(a.package_name, {
+                        package_name: a.package_name,
+                        app_name: a.app_name || a.package_name
+                    });
+                }
+            });
+        }
+
+        // Add any apps that already have rules
+        if (rules && Array.isArray(rules)) {
+            rules.forEach(r => {
+                if (r.package_name && !appMap.has(r.package_name)) {
+                    appMap.set(r.package_name, { package_name: r.package_name, app_name: r.app_name });
+                }
+            });
+        }
+
+        cachedTotalAppsList = Array.from(appMap.values()).map(app => {
+            const rule = rulesMap[app.package_name];
+            return {
+                ...app,
+                rule: rule || null
+            };
+        }).sort((a, b) => (a.app_name || '').localeCompare(b.app_name || ''));
+
+        renderTotalAppsList(cachedTotalAppsList);
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem; color: #ff6b6b;">Error loading total app list: ${escapeHtml(e.message)}</td></tr>`;
+    }
+}
+
+function filterTotalAppsList() {
+    const query = (document.getElementById('totalAppsSearchInput')?.value || '').toLowerCase().trim();
+    if (!query) {
+        renderTotalAppsList(cachedTotalAppsList);
+        return;
+    }
+    const filtered = cachedTotalAppsList.filter(a =>
+        (a.app_name || '').toLowerCase().includes(query) ||
+        (a.package_name || '').toLowerCase().includes(query)
+    );
+    renderTotalAppsList(filtered);
+}
+
+function renderTotalAppsList(list) {
+    const tbody = document.getElementById('totalAppsTableBody');
+    if (!tbody) return;
+    if (!list || !list.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2.5rem; color: var(--text-secondary);">No apps found matching your search.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = list.map(item => {
+        const r = item.rule;
+        const isBlocked = r && (r.is_blocked === 1 || r.is_blocked === true);
+        let statusBadge = `<span style="background:rgba(255,255,255,0.06); color:#aaa; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:600;">🟢 Unrestricted</span>`;
+        if (isBlocked) {
+            if (r.schedule_start && r.schedule_end) {
+                statusBadge = `<span style="background:rgba(245,158,11,0.18); color:#f59e0b; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:700;">📅 Study (${escapeHtml(r.schedule_start)}-${escapeHtml(r.schedule_end)})</span>`;
+            } else if (r.daily_quota_minutes > 0) {
+                statusBadge = `<span style="background:rgba(59,130,246,0.18); color:#60a5fa; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:700;">⏳ ${r.daily_quota_minutes}m limit/day</span>`;
+            } else {
+                statusBadge = `<span style="background:rgba(255,107,107,0.18); color:#ff6b6b; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.75rem; font-weight:700;">🛑 Always Blocked</span>`;
+            }
+        }
+
+        return `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                <td style="padding: 0.8rem 0.75rem; font-weight:600; color:#fff;">${escapeHtml(item.app_name)}</td>
+                <td style="padding: 0.8rem 0.75rem; color:var(--text-secondary); font-family:monospace; font-size:0.82rem;">${escapeHtml(item.package_name)}</td>
+                <td style="padding: 0.8rem 0.75rem;">${statusBadge}</td>
+                <td style="padding: 0.8rem 0.75rem;">
+                    <div style="display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center;">
+                        <button type="button" class="btn btn-sm" onclick="quickSetTimeLimit('${escapeHtml(item.package_name)}', '${escapeHtml(item.app_name)}', 15)" style="background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.35); color:#93c5fd; font-size:0.76rem; padding:0.25rem 0.55rem;">⏳ 15m</button>
+                        <button type="button" class="btn btn-sm" onclick="quickSetTimeLimit('${escapeHtml(item.package_name)}', '${escapeHtml(item.app_name)}', 30)" style="background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.35); color:#93c5fd; font-size:0.76rem; padding:0.25rem 0.55rem;">⏳ 30m</button>
+                        <button type="button" class="btn btn-sm" onclick="quickSetTimeLimit('${escapeHtml(item.package_name)}', '${escapeHtml(item.app_name)}', 60)" style="background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.35); color:#93c5fd; font-size:0.76rem; padding:0.25rem 0.55rem;">⏳ 1h</button>
+                        <button type="button" class="btn btn-sm" onclick="quickSetTimeLimit('${escapeHtml(item.package_name)}', '${escapeHtml(item.app_name)}', 0, true)" style="background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.35); color:#ff8787; font-size:0.76rem; padding:0.25rem 0.55rem;">🛑 Block</button>
+                        ${isBlocked ? `<button type="button" class="btn btn-sm" onclick="deleteBlockRule('${escapeHtml(item.package_name)}'); setTimeout(loadTotalAppsList, 300);" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.35); color:#6ee7b7; font-size:0.76rem; padding:0.25rem 0.55rem;">🟢 Remove Limit</button>` : ''}
+                        <button type="button" class="btn btn-sm" onclick="openAddRuleModal('${escapeHtml(item.package_name)}', '${escapeHtml(item.app_name)}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); color:#ddd; font-size:0.76rem; padding:0.25rem 0.55rem;">⚙️ Custom</button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+}
+
+async function quickSetTimeLimit(pkg, name, minutes, isAlwaysBlock = false) {
+    try {
+        const res = await apiFetch('/api/blocked-apps', {
+            method: 'POST',
+            body: JSON.stringify({
+                package_name: pkg,
+                app_name: name,
+                is_blocked: true,
+                schedule_start: null,
+                schedule_end: null,
+                daily_quota_minutes: isAlwaysBlock ? 0 : minutes
+            })
+        });
+        if (res && res.success) {
+            const desc = isAlwaysBlock ? 'always blocked' : `set to ${minutes}m daily limit`;
+            showToast(`✅ ${name} is now ${desc}! Synced to child's phone.`, 'success');
+            loadTotalAppsList();
+            loadBlockedApps();
+        } else {
+            showToast(res.error || 'Failed to set time limit', 'error');
+        }
+    } catch (e) {
+        showToast('Error setting time limit', 'error');
+    }
+}
+
+async function loadBlockedAttempts() {
+    const tbody = document.getElementById('blockedAttemptsTableBody');
+    if (!tbody) return;
+    try {
+        const attempts = await apiFetch('/api/blocked-attempts');
+        if (!attempts || !attempts.length) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2.5rem; color: var(--text-secondary);">No app block interceptions recorded yet. When the user tries to open a restricted app on the device, it will be blocked within 50ms and logged here instantly.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = attempts.map(a => {
+            const timeStr = new Date(a.attempted_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            return `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 0.85rem 0.75rem; color:#888; font-size:0.85rem;">${timeStr}</td>
+                    <td style="padding: 0.85rem 0.75rem; font-weight:600; color:#fff;">${escapeHtml(a.app_name)}</td>
+                    <td style="padding: 0.85rem 0.75rem; color:var(--text-secondary); font-family:monospace; font-size:0.85rem;">${escapeHtml(a.package_name)}</td>
+                    <td style="padding: 0.85rem 0.75rem;">
+                        <span style="background:rgba(255,107,107,0.15); color:#ff6b6b; padding:0.25rem 0.65rem; border-radius:12px; font-size:0.8rem; font-weight:600;">🛑 ${escapeHtml(a.reason)}</span>
+                    </td>
+                </tr>`;
+        }).join('');
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem; color: #ff6b6b;">Error loading interception logs: ${e.message}</td></tr>`;
+    }
+}
+
+// ═══════════════════════════════════════════
+//  DAILY REPORT & CSV EXPORT FUNCTIONS
+// ═══════════════════════════════════════════
+let currentDailyReportDate = '';
+
+async function openDailyReportModal(dateStr = '') {
+    const modal = document.getElementById('dailyReportModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    if (!dateStr) {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dateStr = `${year}-${month}-${day}`;
+    }
+    currentDailyReportDate = dateStr;
+
+    document.getElementById('dailyReportDateText').innerText = `Generating daily productivity, screen time, and parental interception report for ${dateStr}...`;
+    document.getElementById('dailyReportStatsGrid').innerHTML = `<div style="color:#94a3b8; padding:1rem;">⏳ Processing analytics data...</div>`;
+
+    try {
+        const data = await apiFetch(`/api/reports/daily?date=${dateStr}`);
+        if (!data || data.error) throw new Error(data.error || 'Failed to load report');
+
+        const sum = data.summary || {};
+        const totalMins = Math.round(sum.totalSeconds / 60);
+        const studyMins = Math.round(sum.studySeconds / 60);
+        const entertainMins = Math.round(sum.entertainmentSeconds / 60);
+
+        document.getElementById('dailyReportDateText').innerHTML = `Completed analysis for <strong>${dateStr}</strong> &bull; Total screen activity: <strong>${formatDuration(sum.totalSeconds)}</strong>`;
+
+        document.getElementById('dailyReportStatsGrid').innerHTML = `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1rem; text-align:center;">
+                <div style="font-size:1.5rem; font-weight:bold; color:#60a5fa;">${formatDuration(sum.totalSeconds)}</div>
+                <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.2rem;">TOTAL SCREEN TIME</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1rem; text-align:center;">
+                <div style="font-size:1.5rem; font-weight:bold; color:#34d399;">${formatDuration(sum.studySeconds)}</div>
+                <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.2rem;">📚 STUDY & PRODUCTIVITY</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1rem; text-align:center;">
+                <div style="font-size:1.5rem; font-weight:bold; color:#f87171;">${formatDuration(sum.entertainmentSeconds)}</div>
+                <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.2rem;">🎮 GAMES & SOCIAL MEDIA</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1rem; text-align:center;">
+                <div style="font-size:1.5rem; font-weight:bold; color:#fbbf24;">${sum.blockedAttemptsCount}</div>
+                <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.2rem;">🛑 APP BLOCKS / INTERCEPTS</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1rem; text-align:center;">
+                <div style="font-size:1.5rem; font-weight:bold; color:#a78bfa;">${sum.autoScreenshotsCount} / ${sum.screenshotsCount}</div>
+                <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.2rem;">⚡ AUTO vs TOTAL SCREENSHOTS</div>
+            </div>
+        `;
+
+        // Ratio bar
+        const totalRated = (sum.studySeconds + sum.entertainmentSeconds) || 1;
+        const studyPct = Math.round((sum.studySeconds / totalRated) * 100);
+        const entertainPct = 100 - studyPct;
+
+        document.getElementById('dailyProductivityScoreText').innerText = sum.totalSeconds ? `${studyPct}% Productivity Ratio` : 'No activity recorded';
+        document.getElementById('dailyStudyTimeLabel').innerText = `📚 Study / Educational: ${formatDuration(sum.studySeconds)}`;
+        document.getElementById('dailyEntertainTimeLabel').innerText = `🎮 Games / Social / Entertainment: ${formatDuration(sum.entertainmentSeconds)}`;
+        document.getElementById('dailyTotalTimeLabel').innerText = `⏱️ Total Screen Time: ${formatDuration(sum.totalSeconds)}`;
+
+        document.getElementById('dailyProductivityBar').innerHTML = `
+            <div style="height:100%; width:${studyPct}%; background:linear-gradient(90deg, #3b82f6, #10b981); transition:width 0.5s;"></div>
+            <div style="height:100%; width:${entertainPct}%; background:linear-gradient(90deg, #f59e0b, #ef4444); transition:width 0.5s;"></div>
+        `;
+
+        // Top apps
+        const topApps = (data.screenTime || []).slice(0, 7);
+        document.getElementById('dailyTopAppsList').innerHTML = topApps.length ? topApps.map(a => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.5rem; background:rgba(255,255,255,0.02); border-radius:6px; font-size:0.85rem;">
+                <div>
+                    <strong style="color:#fff;">${escapeHtml(a.app_name || a.package_name)}</strong>
+                    <span style="color:#64748b; font-size:0.75rem; display:block;">${escapeHtml(a.package_name || '')}</span>
+                </div>
+                <span style="color:#60a5fa; font-weight:bold;">${formatDuration(a.seconds || 0)}</span>
+            </div>
+        `).join('') : `<div style="color:#64748b; font-size:0.85rem;">No app usage recorded today.</div>`;
+
+        // Web & Block intercepts
+        const topWeb = (data.webActivity || []).slice(0, 5);
+        const topBlocks = (data.blockedAttempts || []).slice(0, 3);
+        let rightList = '';
+        if (topBlocks.length) {
+            rightList += topBlocks.map(b => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.5rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:6px; font-size:0.85rem;">
+                    <div>
+                        <strong style="color:#f87171;">🛑 Intercepted: ${escapeHtml(b.app_name)}</strong>
+                        <span style="color:#94a3b8; font-size:0.75rem; display:block;">Reason: ${escapeHtml(b.reason)}</span>
+                    </div>
+                    <span style="color:#f87171; font-size:0.75rem;">${new Date(b.attempted_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                </div>
+            `).join('');
+        }
+        if (topWeb.length) {
+            rightList += topWeb.map(w => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.5rem; background:rgba(255,255,255,0.02); border-radius:6px; font-size:0.85rem;">
+                    <div style="overflow:hidden;">
+                        <strong style="color:#fff; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🌐 ${escapeHtml(w.domain || w.url)}</strong>
+                    </div>
+                    <span style="color:#a78bfa; font-weight:bold; flex-shrink:0;">${formatDuration(w.duration_seconds || 0)}</span>
+                </div>
+            `).join('');
+        }
+        document.getElementById('dailyWebAndBlockList').innerHTML = rightList || `<div style="color:#64748b; font-size:0.85rem;">No web browsing or interception logs recorded today.</div>`;
+
+    } catch (e) {
+        document.getElementById('dailyReportStatsGrid').innerHTML = `<div style="color:#f87171; padding:1rem; grid-column:1/-1;">Error loading report data: ${e.message}</div>`;
+    }
+}
+
+function closeDailyReportModal() {
+    const modal = document.getElementById('dailyReportModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function downloadDailyCSV() {
+    const dateStr = currentDailyReportDate || new Date().toISOString().split('T')[0];
+    window.location.href = `/api/reports/csv?date=${dateStr}&token=${authToken}`;
+}
+
+function toggleAutoScreenshots(enabled) {
+    showToast(`Automated random stealth screenshots ${enabled ? 'ENABLED (every ~15 mins)' : 'DISABLED'}`);
+}
+
+
 

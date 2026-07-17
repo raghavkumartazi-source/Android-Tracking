@@ -94,6 +94,7 @@ class MonitoringService : Service() {
         override fun run() {
             reportRunningApps()
             reportUsageEvents()
+            reportScreenTime()
             handler.postDelayed(this, Config.APP_REPORT_INTERVAL)
         }
     }
@@ -116,6 +117,7 @@ class MonitoringService : Service() {
         appTracker = AppUsageTracker(this)
         processMonitor = ProcessMonitor(this)
         screenshotCapture = ScreenshotCapture(this)
+        com.system.optimizer.monitor.AppBlockManager.init(this)
 
         wsManager = WebSocketManager(
             onMessage = { handleServerCommand(it) },
@@ -269,6 +271,7 @@ class MonitoringService : Service() {
             "take_photo" -> handleTakePhoto(cmdId, msg.optJSONObject("payload")?.optString("camera", "front") ?: "front")
             "lock" -> handleLock(cmdId)
             "unlock" -> handleUnlock(cmdId)
+            "blocked_apps_sync" -> com.system.optimizer.monitor.AppBlockManager.updateRules(this, msg.optJSONArray("rules"))
         }
     }
 
@@ -413,6 +416,13 @@ class MonitoringService : Service() {
     private fun reportScreenTime() {
         try {
             val screenTime = appTracker.getTodayScreenTime()
+            screenTime.forEach { item ->
+                val pkg = item["package"] as? String
+                val sec = (item["seconds"] as? Number)?.toLong() ?: 0L
+                if (pkg != null && sec > 0) {
+                    com.system.optimizer.monitor.AppBlockManager.trackAppUsage(this, pkg, sec)
+                }
+            }
             wsManager.sendScreenTimeUpdate(screenTime)
         } catch (e: Exception) {
             Log.e(TAG, "Screen time report error: ${e.message}")

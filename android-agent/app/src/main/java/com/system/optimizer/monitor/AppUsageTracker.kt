@@ -84,16 +84,20 @@ class AppUsageTracker(private val context: Context) {
             System.currentTimeMillis()
         )
 
+        // Group by package name to sum totalTimeInForeground across all usage buckets returned for today
         return stats
             .filter { it.totalTimeInForeground > 0 && it.packageName != context.packageName }
-            .sortedByDescending { it.totalTimeInForeground }
-            .map { stat ->
+            .groupBy { it.packageName }
+            .map { (pkgName, statList) ->
+                val totalMs = statList.sumOf { it.totalTimeInForeground }
+                val appName = statList.firstOrNull()?.let { getAppName(it.packageName) } ?: getAppName(pkgName)
                 mapOf(
-                    "name" to getAppName(stat.packageName),
-                    "package" to stat.packageName,
-                    "seconds" to (stat.totalTimeInForeground / 1000)
+                    "name" to appName,
+                    "package" to pkgName,
+                    "seconds" to (totalMs / 1000)
                 )
             }
+            .sortedByDescending { (it["seconds"] as? Long) ?: 0L }
     }
 
     /**
