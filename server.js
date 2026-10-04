@@ -6,6 +6,9 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
 const { initDB } = require('./db');
+const { loadSecrets, constantTimeEqual, validSession, createLoginLimiter } = require('./auth');
+const { pin: PIN, agentKey: AGENT_KEY } = loadSecrets(process.env);
+const allowLogin = createLoginLimiter();
 
 // ═══════════════════════════════════════════
 //  Initialize
@@ -14,13 +17,11 @@ const db = initDB();
 const app = express();
 const server = http.createServer(app);
 
-const agentWss = new WebSocketServer({ noServer: true });
-const dashboardWss = new WebSocketServer({ noServer: true });
+const agentWss = new WebSocketServer({ noServer: true, maxPayload: 16 * 1024 });
+const dashboardWss = new WebSocketServer({ noServer: true, maxPayload: 16 * 1024 });
 
 // Config
 const PORT = process.env.PORT || 3000;
-const PIN = process.env.DASHBOARD_PIN || '1234';
-const AGENT_KEY = process.env.AGENT_KEY || 'bharatwatch-agent-secret-change-me';
 
 // Ensure screenshots and camera directories
 const SCREENSHOTS_DIR = process.env.SCREENSHOTS_DIR || path.join(__dirname, 'data', 'screenshots');
@@ -39,21 +40,20 @@ const dashboardSockets = new Set();
 // ═══════════════════════════════════════════
 //  Middleware
 // ═══════════════════════════════════════════
-app.use(express.json({ limit: '15mb' }));
+app.use(express.json({ limit: '16kb' }));
+app.use((req, res, next) => { res.setHeader('Cache-Control', 'no-store'); res.setHeader('Referrer-Policy', 'no-referrer'); res.setHeader('X-Content-Type-Options', 'nosniff'); next(); });
 app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+    if (['/api/screenshot', '/api/take-photo', '/api/lock', '/api/unlock', '/api/blocked-apps'].some(route => req.path === route || req.path.startsWith(route + '/'))) {
+        return res.status(410).json({ error: 'Remote capture and device control have been removed. This build shares device health only.' });
+    }
+    next();
+});
 
 // Auth middleware
 function requireAuth(req, res, next) {
-    const token = req.headers['authorization']?.replace('Bearer ', '') || req.query.token;
-    if (!token || !sessions.has(token)) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-    const session = sessions.get(token);
-    // 24-hour session expiry
-    if (Date.now() - session.created > 24 * 60 * 60 * 1000) {
-        sessions.delete(token);
-        return res.status(401).json({ error: 'Session expired' });
-    }
+    const token = req.headers['authorization']?.replace(/^Bearer /, '');
+    if (!validSession(sessions, token)) return res.status(401).json({ error: 'Unauthorized' });
     next();
 }
 
@@ -63,6 +63,7 @@ function requireAuth(req, res, next) {
 function broadcastToDashboard(data) {
     const msg = JSON.stringify(data);
     dashboardSockets.forEach(ws => {
+        if (!validSession(sessions, ws.authToken)) { ws.close(1008, 'Session expired'); return; }
         if (ws.readyState === WebSocket.OPEN) ws.send(msg);
     });
 }
@@ -156,9 +157,12 @@ function getLocalDateString(d = new Date()) {
 //  AUTH ENDPOINTS
 // ═══════════════════════════════════════════
 app.post('/api/login', (req, res) => {
+    if (!allowLogin(req.socket.remoteAddress || 'unknown')) return res.status(429).json({ error: 'Too many attempts. Try again in five minutes.' });
     const { pin } = req.body;
-    if (pin === PIN) {
+    if (constantTimeEqual(pin, PIN)) {
         const token = crypto.randomBytes(32).toString('hex');
+        for (const token of sessions.keys()) validSession(sessions, token);
+        if (sessions.size >= 1000) return res.status(429).json({ error: 'Session capacity reached.' });
         sessions.set(token, { created: Date.now() });
         res.json({ success: true, token });
     } else {
@@ -569,8 +573,8 @@ server.on('upgrade', (request, socket, head) => {
     const url = new URL(request.url, `http://${request.headers.host}`);
 
     if (url.pathname === '/ws/agent') {
-        const key = url.searchParams.get('key');
-        if (key !== AGENT_KEY) {
+        const key = request.headers.authorization?.replace(/^Bearer /, '');
+        if (!constantTimeEqual(key, AGENT_KEY)) {
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
             socket.destroy();
             return;
@@ -580,7 +584,7 @@ server.on('upgrade', (request, socket, head) => {
         });
     } else if (url.pathname === '/ws/dashboard') {
         const token = url.searchParams.get('token');
-        if (!token || !sessions.has(token)) {
+        if (!validSession(sessions, token)) {
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
             socket.destroy();
             return;
@@ -604,18 +608,6 @@ agentWss.on('connection', (ws) => {
     db.prepare('UPDATE device_status SET is_online = 1, last_seen = ?, updated_at = ? WHERE id = 1')
         .run(now, now);
     broadcastToDashboard({ type: 'agent_online' });
-
-    // Immediately push blocked apps sync to the newly connected agent
-    try {
-        const rules = db.prepare('SELECT * FROM blocked_apps').all();
-        ws.send(JSON.stringify({
-            type: 'command',
-            command: 'blocked_apps_sync',
-            rules: rules
-        }));
-    } catch (err) {
-        console.error('Error sending initial blocked apps sync:', err.message);
-    }
 
     ws.isAlive = true;
     ws.on('pong', () => { ws.isAlive = true; });
@@ -644,7 +636,8 @@ agentWss.on('connection', (ws) => {
 // ═══════════════════════════════════════════
 //  DASHBOARD WEBSOCKET
 // ═══════════════════════════════════════════
-dashboardWss.on('connection', (ws) => {
+dashboardWss.on('connection', (ws, request) => {
+    ws.authToken = new URL(request.url, 'http://localhost').searchParams.get('token');
     dashboardSockets.add(ws);
     console.log(`📊 Dashboard connected (${dashboardSockets.size} active)`);
 
@@ -666,6 +659,8 @@ dashboardWss.on('connection', (ws) => {
 //  HANDLE AGENT MESSAGES
 // ═══════════════════════════════════════════
 function handleAgentMessage(msg) {
+    // This build accepts device health only. Reject legacy collection messages.
+    if (msg.type !== 'heartbeat') return;
     const now = new Date().toISOString();
 
     switch (msg.type) {
@@ -674,13 +669,13 @@ function handleAgentMessage(msg) {
                 last_seen = ?, battery_level = ?, current_app = ?, 
                 current_package = ?, is_screen_on = ?, updated_at = ? 
                 WHERE id = 1`)
-                .run(now, msg.battery ?? null, msg.currentApp ?? null,
-                    msg.currentPackage ?? null, msg.screenOn ? 1 : 0, now);
+                .run(now, msg.battery ?? null, null,
+                    null, msg.screenOn ? 1 : 0, now);
             broadcastToDashboard({
                 type: 'heartbeat',
                 battery: msg.battery,
-                currentApp: msg.currentApp,
-                currentPackage: msg.currentPackage,
+                currentApp: null,
+                currentPackage: null,
                 screenOn: msg.screenOn,
                 lastSeen: now
             });
@@ -870,6 +865,7 @@ function handleAgentMessage(msg) {
 //  AGENT HEARTBEAT CHECK
 // ═══════════════════════════════════════════
 const hbInterval = setInterval(() => {
+    for (const ws of dashboardSockets) if (!validSession(sessions, ws.authToken)) ws.close(1008, 'Session expired');
     agentWss.clients.forEach(ws => {
         if (!ws.isAlive) return ws.terminate();
         ws.isAlive = false;
@@ -891,7 +887,6 @@ server.listen(PORT, () => {
 ║  Dashboard:  http://localhost:${String(PORT).padEnd(5)}          ║
 ║  Agent WS:   ws://localhost:${String(PORT).padEnd(5)}/ws/agent  ║
 ║                                               ║
-║  PIN: ${String(PIN).padEnd(40)}║
 ╚═══════════════════════════════════════════════╝
     `);
 });

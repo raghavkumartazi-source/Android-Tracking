@@ -8,12 +8,19 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        // Stealth application ID — looks like a system utility
+        // Keep the application ID so existing installs can receive a visible, safer upgrade.
         applicationId = "com.system.service.optimizer"
         minSdk = 30        // Android 11
-        targetSdk = 33     // Target Android 13 (avoids Android 14 restrictions)
-        versionCode = 1
-        versionName = "1.0.0"
+        targetSdk = 34
+        versionCode = 2
+        versionName = "1.1.0"
+    }
+
+    buildFeatures { buildConfig = true }
+    defaultConfig {
+        fun quoted(value: String): String = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+        buildConfigField("String", "AGENT_SERVER_URL", quoted(System.getenv("BHARATWATCH_SERVER_URL") ?: ""))
+        buildConfigField("String", "AGENT_KEY", quoted(System.getenv("BHARATWATCH_AGENT_KEY") ?: ""))
     }
 
     buildTypes {
