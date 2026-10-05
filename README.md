@@ -8,7 +8,7 @@ Treat credentials from the old public source or APKs as exposed. **Generate and 
 
 ## Server
 
-Use Node 22 or newer. Run `npm install`, copy `.env.example` to `.env`, then set a unique `DASHBOARD_PIN` passphrase (at least 12 characters) and a separate random `AGENT_KEY` (at least 32 characters). For example, `openssl rand -hex 32` generates a token. Missing, weak or known placeholder credentials prevent startup. No credentials are logged. Run `npm start` behind HTTPS/WSS with a trusted reverse proxy. The dashboard input retains the historical `pin` field name but now requires a passphrase. Login permits five attempts per socket IP per five minutes; proxy deployments should add trusted-edge rate limiting. Sessions expire after 24 hours in both HTTP and WebSocket paths; logout/expiry also closes open dashboard connections within 30 seconds.
+Use Node 22 or newer. Run `npm ci`, copy `.env.example` to `.env`, then set a unique `DASHBOARD_PIN` passphrase (at least 12 characters) and a separate random `AGENT_KEY` (at least 32 characters). For example, `openssl rand -hex 32` generates a token. Missing, weak or known placeholder credentials prevent startup. No credentials are logged. Run `npm start` behind HTTPS/WSS with a trusted reverse proxy. The dashboard input retains the historical `pin` field name but now requires a passphrase. Login permits five attempts per socket IP per five minutes; proxy deployments should add trusted-edge rate limiting. Sessions expire after 24 hours in both HTTP and WebSocket paths; logout/expiry also closes open dashboard connections within 30 seconds.
 
 ## Android build
 
