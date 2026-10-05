@@ -23,3 +23,5 @@ android-agent/local.properties
 # OS junk
 .DS_Store
 Thumbs.db
+
+!.env.example

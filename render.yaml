@@ -7,9 +7,9 @@ services:
       - key: PORT
         value: 3000
       - key: DASHBOARD_PIN
-        value: 1234
+        sync: false
       - key: AGENT_KEY
-        value: bharatwatch-agent-secret-change-me
+        sync: false
       - key: DATABASE_PATH
         value: /app/data/bharatwatch.db
       - key: SCREENSHOTS_DIR

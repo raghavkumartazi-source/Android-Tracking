@@ -59,10 +59,11 @@ class WebSocketManager(
     private fun doConnect() {
         if (connected) return
 
-        val url = "${Config.SERVER_URL}?key=${Config.AGENT_KEY}"
+        val url = Config.SERVER_URL
         Log.i(TAG, "Connecting to $url")
 
-        val request = Request.Builder().url(url).build()
+        val request = Request.Builder().url(url)
+            .header("Authorization", "Bearer ${Config.AGENT_KEY}").build()
 
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(ws: WebSocket, response: Response) {
